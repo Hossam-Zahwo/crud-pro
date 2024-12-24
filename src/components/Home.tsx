@@ -5,6 +5,7 @@ import SearchandFilters from "./SearchandFilters";
 interface Product {
   id: number;
   name: string;
+  description: string;
   price: number;
   category: string;
   size: string;
@@ -13,8 +14,8 @@ interface Product {
 }
 
 const initialProducts: Product[] = [
-  { id: 1, name: "T-shirt", price: 20, category: "Men", size: "M", stock: 10, inventoryId: 101 },
-  { id: 2, name: "Jeans", price: 40, category: "Women", size: "L", stock: 15, inventoryId: 102 },
+  { id: 1, name: "T-shirt", description: "test description 1", price: 20, category: "Men", size: "M", stock: 10, inventoryId: 101 },
+  { id: 2, name: "Jeans", description: "test description 2", price: 40, category: "Women", size: "L", stock: 15, inventoryId: 102 },
 ];
 
 function Home() {
@@ -22,6 +23,7 @@ function Home() {
   const [newProduct, setNewProduct] = useState<Product>({
     id: 0,
     name: "",
+    description: "",
     price: 0,
     category: "",
     size: "",
@@ -63,9 +65,9 @@ function Home() {
   };
 
   const handleAddClick = () => {
-    if (newProduct.name && newProduct.price && newProduct.category && newProduct.size && newProduct.stock) {
+    if (newProduct.name && newProduct.price && newProduct.description && newProduct.category && newProduct.size && newProduct.stock) {
       addProduct(newProduct);
-      setNewProduct({ id: 0, name: "", price: 0, category: "", size: "", stock: 0, inventoryId: 0 }); // Reset the form
+      setNewProduct({ id: 0, name: "", description: "", price: 0, category: "", size: "", stock: 0, inventoryId: 0 }); // Reset the form
     } else {
       alert("Please fill all fields");
     }
@@ -94,6 +96,11 @@ function Home() {
       product.price <= maxPrice
   );
 
+  // Storage Products in Loacl S
+  localStorage.setItem("products", JSON.stringify(filteredProducts));
+
+  console.log(filteredProducts);
+
   return (
     <div className="flex flex-col justify-center items-center min-h-screen w-full bg-gray-100">
       <div className="p-4 w-full max-w-screen-lg rounded-lg shadow-md flex flex-col bg-white">
@@ -111,6 +118,17 @@ function Home() {
                 value={newProduct.name}
                 onChange={handleInputChange}
                 placeholder="Product Name"
+                className="border p-3 mb-4 w-full"
+              />
+            </div>
+            <div>
+              <label className="block mb-2 text-gray-700">Product Description</label>
+              <input
+                type="text"
+                name="description"
+                value={newProduct.description}
+                onChange={handleInputChange}
+                placeholder="Product Description"
                 className="border p-3 mb-4 w-full"
               />
             </div>
@@ -195,6 +213,7 @@ function Home() {
               >
                 <div className="mb-4 text-gray-700">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <p>{product.description}</p>
                   <p>${product.price}</p>
                   <p>{product.category}</p>
                   <p>Size: {product.size}</p>
