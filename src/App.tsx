@@ -9,7 +9,7 @@ function App() {
   return (
     <div className="flex">
       <Navbar />
-      <div className="flex-grow flex justify-center items-center h-screen overflow-auto p-5 mt-96">
+      <div className="flex-grow flex justify-center items-center  overflow-auto p-5 ">
         <Routes >
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
