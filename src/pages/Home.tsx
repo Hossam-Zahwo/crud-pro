@@ -25,7 +25,7 @@ function Home() {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null); // State to manage product for editing
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
   const [customer, setCustomer] = useState<Customer | null>(null); // State to manage customer data
-  const [showCustomerForm, setShowCustomerForm] = useState<boolean>(true); // State to control customer form display
+  const [showCustomerForm, setShowCustomerForm] = useState<boolean>(false); // State to control customer form display
   const [currentDate, setCurrentDate] = useState<string>(new Date().toLocaleDateString()); // State to store current date
 
   useEffect(() => {
@@ -100,7 +100,6 @@ function Home() {
 
   const handleSaveCustomer = (customer: Customer) => {
     setCustomer(customer); // Save customer data
-    setShowCustomerForm(false); // Hide customer form
   };
 
   return (
@@ -122,7 +121,7 @@ function Home() {
         <Header 
           searchQuery={debouncedSearchQuery} 
           setSearchQuery={setDebouncedSearchQuery} // Pass search query handler to header
-          setCustomerPurchases={setCustomerPurchases} // Pass setCustomerPurchases handler to header
+          onSaveCustomer={handleSaveCustomer} // Pass handleSaveCustomer to header
         />
 
         {/* Product List Section */}
