@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { getInitialProducts, saveProductsToLocalStorage } from '../utils/localStorageUtils'; // Import save and get functions
+import { Product } from '../data/productData'; // Import Product type
 
 interface SearchandFiltersProps {
   searchQuery: string;
@@ -23,6 +25,15 @@ function SearchandFilters({
   selectedCategory,
   handleCategoryChange,
 }: SearchandFiltersProps) {
+  
+  // Initialize products from localStorage
+  const products = getInitialProducts();
+
+  // Save updated products to localStorage on any change
+  useEffect(() => {
+    saveProductsToLocalStorage(products);
+  }, [products]);
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 mb-6 w-full">
       <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Product } from '../data/productData'; // Import Product type
 
 interface AddProductFormProps {
   newProduct: Product;

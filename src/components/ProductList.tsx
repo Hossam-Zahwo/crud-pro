@@ -1,5 +1,7 @@
 import React from 'react';
 import { FaTrash, FaEdit } from 'react-icons/fa';
+import { saveProductsToLocalStorage } from '../utils/localStorageUtils'; // Import save function
+import { Product } from '../data/productData'; // Import Product type
 
 interface ProductListProps {
   products: Product[];
@@ -14,6 +16,20 @@ const ProductList: React.FC<ProductListProps> = ({
   setNewProduct,
   handleStockChange
 }) => {
+  
+  const handleDeleteProduct = (id: number) => {
+    deleteProduct(id);
+    saveProductsToLocalStorage(products.filter(product => product.id !== id)); // Update localStorage
+  };
+
+  const handleStockChangeWithSave = (productId: number, change: number) => {
+    handleStockChange(productId, change);
+    const updatedProducts = products.map(product => 
+      product.id === productId ? { ...product, stock: product.stock + change } : product
+    );
+    saveProductsToLocalStorage(updatedProducts); // Update localStorage
+  };
+
   return (
     <div className="w-full">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">Product List</h2>
@@ -21,7 +37,7 @@ const ProductList: React.FC<ProductListProps> = ({
         {products.map((product) => (
           <div
             key={product.id}
-            className="p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col w-[270px] md:w-[300px] mx-auto"
+            className="p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col w-[270px] md:w-[370px] mx-auto"
           >
             <div className="mb-4 text-gray-700">
               <img
@@ -38,19 +54,19 @@ const ProductList: React.FC<ProductListProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => handleStockChange(product.id, -1)} // Decrease stock
+                onClick={() => handleStockChangeWithSave(product.id, -1)} // Decrease stock
                 className="bg-yellow-500 text-white p-2 flex justify-center items-center rounded-lg w-full sm:w-auto"
               >
                 Decrease Stock
               </button>
               <button
-                onClick={() => handleStockChange(product.id, 1)} // Increase stock
+                onClick={() => handleStockChangeWithSave(product.id, 1)} // Increase stock
                 className="bg-blue-500 text-white p-2 flex justify-center items-center rounded-lg w-full sm:w-auto"
               >
                 Increase Stock
               </button>
               <button
-                onClick={() => deleteProduct(product.id)}
+                onClick={() => handleDeleteProduct(product.id)}
                 className="bg-red-500 text-white p-2 flex justify-center items-center rounded-lg w-full sm:w-auto"
               >
                 <FaTrash className="mr-2" /> Delete
