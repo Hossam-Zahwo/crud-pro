@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FaHome, FaInfoCircle, FaPhone , } from 'react-icons/fa';
+import { FaHome, FaInfoCircle, FaPhone , FaHashtag} from 'react-icons/fa';
 import { MdCreateNewFolder } from "react-icons/md";
 
 
@@ -53,6 +53,18 @@ function Navbar() {
             }
           >
             <MdCreateNewFolder className="mr-2" /> AddNew
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/sales"
+            className={({ isActive }) =>
+              isActive
+                ? " py-2 px-4 bg-gray-800 flex items-center"
+                : " py-2 px-4 hover:bg-gray-700 flex items-center"
+            }
+          >
+            <FaHashtag className="mr-2" /> Sales
           </NavLink>
         </li>
       </ul>

@@ -51,6 +51,26 @@ function Home() {
   const handleDelete = (id: number) => {
     const updatedProducts = products.filter(product => product.id !== id);
     setProducts(updatedProducts);
+
+    const deletedTime = new Date().toLocaleTimeString();
+    const deletedDate = new Date().toLocaleDateString();
+
+    const deletedProducts = JSON.parse(localStorage.getItem('products-delete') || '[]');
+
+
+    const productToDelete = products.find(product => product.id === id);
+    if (productToDelete) {
+      deletedProducts.push({
+        ...productToDelete,
+        deletedTime,
+        deletedDate
+      });
+    }
+
+    localStorage.setItem('products-delete', JSON.stringify(deletedProducts));
+  
+    const deletedCount = JSON.parse(localStorage.getItem('deletedCount') || '0');
+    localStorage.setItem('deletedCount', JSON.stringify(deletedCount + 1));
   };
 
   const handleView = (product: Product) => {
