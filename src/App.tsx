@@ -1,21 +1,20 @@
 import { Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
 import About from './components/About';
-import Contact from './components/Contact';
 import Navbar from './components/Navbar';
 import './index.css';
-import Products from './components/Products';
+import AddNew from './pages/AddNew';
+import Home from './pages/Home';
 
 function App() {
   return (
-    <div className="flex">
+    <div className="grid">
       <Navbar />
-      <div className="flex-grow flex justify-center   overflow-auto p-5 ">
+      <div className="flex-grow flex justify-center items-center ml-28  overflow-auto p-5 bg-gray-100">
         <Routes >
-          <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
+          <Route path="/AddNew" element={<AddNew />} />
           <Route path="/about" element={<About />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/contact" element={<Contact />} />
+        
         </Routes>
       </div>
     </div>

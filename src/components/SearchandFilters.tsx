@@ -7,6 +7,9 @@ interface SearchandFiltersProps {
   handleMinPriceChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   maxPrice: number;
   handleMaxPriceChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  categories: string[];
+  selectedCategory: string;
+  handleCategoryChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 function SearchandFilters({
@@ -15,7 +18,10 @@ function SearchandFilters({
   minPrice,
   handleMinPriceChange,
   maxPrice,
-  handleMaxPriceChange
+  handleMaxPriceChange,
+  categories,
+  selectedCategory,
+  handleCategoryChange,
 }: SearchandFiltersProps) {
   return (
     <div className="flex flex-col lg:flex-row gap-6 mb-6 w-full">
@@ -54,8 +60,23 @@ function SearchandFilters({
           </div>
         </div>
       </div>
+      <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1">
+        <h2 className="text-lg font-semibold mb-4 text-gray-700">Category Filter</h2>
+        <select
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          className="border p-3 w-full"
+        >
+          <option value="">Select Category</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
-  )
+  );
 }
 
 export default SearchandFilters;
