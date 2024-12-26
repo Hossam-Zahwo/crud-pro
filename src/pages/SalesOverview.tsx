@@ -32,6 +32,7 @@ const SalesOverview: React.FC = () => {
   const availableYears = Array.from(
     new Set(sales.map((sale) => new Date(sale.saleDate).getFullYear()))
   );
+  console.log(sales);
 
   // Filter sales based on selected filters
   const filteredSales = sales.filter((sale) => {

@@ -92,7 +92,12 @@ function Home() {
   };
 
   const handleAddToCart = (product: Product) => {
-    setCustomerPurchases([...customerPurchases, product]); // Add product to customer purchases
+    setProducts((prevProducts) =>    // Update Value stock at click
+      prevProducts.map((p) =>
+        p.id === product.id ? { ...p, stock: p.stock - 1 } : p
+      )
+    );
+    setCustomerPurchases((prevPurchases) => [...prevPurchases, product]); // Add product to customer purchases
   };
 
   const handleRemoveFromCart = (productId: number) => {
@@ -134,9 +139,9 @@ function Home() {
   
 
   return (
-    <div className="container mx-auto pt-16 flex">
+    <div className="container mx-auto pt-16 flex max-[991px]:flex-col">
       {/* Customer Cart Section */}
-      <div className="w-1/4 p-4 bg-gray-100 shadow-md">
+      <div className="w-1/4 p-4 bg-gray-100 shadow-md max-[991px]:w-full">
         {customer ? (
           <CustomerCart
             purchases={customerPurchases}
@@ -148,7 +153,7 @@ function Home() {
         ) : null}
       </div>
 
-      <div className="content w-3/4 p-4">
+      <div className="content w-3/4 p-4 max-[991px]:w-full">
         <Header 
           searchQuery={debouncedSearchQuery} 
           setSearchQuery={setDebouncedSearchQuery} // Pass search query handler to header
@@ -179,10 +184,9 @@ function Home() {
                   <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4"/>
                   
                 </div>
-              <div className="w-full flex justify-between items-center">
-<div className="w-full flex justify-between items-center">
+              <div className="w-full flex justify-between items-center  max-[991px]:flex-col">
+<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
                     <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
-                    <p className="text-gray-700 text-lg capitalize text-center p-2 mt-4">{product.description}</p>
                     <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
                   
 </div>
@@ -195,7 +199,7 @@ function Home() {
               </div >
               
 
-<div className="w-full flex justify-between items-center">
+<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
     <div className="flex justify-start items-center">
                     <button
                       onClick={() => handleDelete(product.id)}

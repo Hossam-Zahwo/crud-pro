@@ -119,22 +119,22 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           {cartProducts.map((product) => (
             <li
               key={product.id}
-              className="flex justify-between items-center my-1 p-4 bg-gray-100 rounded-lg w-52 shadow-md"
+              className="flex justify-between items-center flex-col my-1 p-4 bg-gray-100 rounded-lg w-[11rem] max-[1100px]:w-[10rem] max-[475px]:w-[9rem] max-[475px]:flex-col max-[475px]:text-center max-[475px]:gap-[0.5rem] shadow-md"
             >
-              <div>
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-[80px] h-16 object-cover rounded-lg"
+              />
+              <div className="flex justify-between items-center gap-[1rem]">
                 <h3 className="text-lg font-semibold">{product.name}</h3>
                 <p className="text-gray-700">
                   ${product.price} x {product.quantity}
                 </p>
               </div>
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-16 h-16 object-cover rounded-lg"
-              />
               <button
                 onClick={() => removeFromCart(product.id)}
-                className="bg-red-500 text-white p-2 ml-4 rounded-lg hover:bg-red-600"
+                className="bg-red-500 text-white p-2  rounded-lg hover:bg-red-600"
               >
                 X
               </button>
