@@ -160,17 +160,48 @@ function Home() {
           onSaveCustomer={handleSaveCustomer} // Pass handleSaveCustomer to header
         />
   {/* Search and Filter Section */}
-  <SearchandFilters
-        searchQuery={searchQuery}
-        handleSearchChange={handleSearchChange}
-        minPrice={minPrice}
-        handleMinPriceChange={handleMinPriceChange}
-        maxPrice={maxPrice}
-        handleMaxPriceChange={handleMaxPriceChange}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        handleCategoryChange={handleCategoryChange}
-      />
+  <div className="flex justify-center items-center">
+    <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-40">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Price Filter</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              
+              <input
+                type="number"
+                value={minPrice}
+                onChange={handleMinPriceChange}
+                className="border p-3 w-full"
+                placeholder="Min Price"
+              />
+            </div>
+            <div>
+            
+              <input
+                type="number"
+                value={maxPrice === Infinity ? "" : maxPrice}
+                onChange={handleMaxPriceChange}
+                className="border p-3 w-full"
+                placeholder="Max Price"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-40">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Category Filter</h2>
+          <select
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            className="border p-3 w-full"
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+</div>
         {/* Product List Section */}
         <section className="pt-8 pb-8 w-full">
           <div className="products grid grid-cols-1 md:grid-cols-3 gap-4">

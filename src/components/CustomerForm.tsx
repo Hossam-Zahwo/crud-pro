@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 interface CustomerFormProps {
   onSave: (customer: Customer) => void;
-  onCancel: () => void; // Add onCancel prop
+  onCancel: () => void;
 }
 
 export interface Customer {
@@ -29,14 +29,19 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSave, onCancel }) => {
       return;
     }
 
+    // Fetch customers from localStorage
+    const storedCustomers = JSON.parse(localStorage.getItem('customers') || '[]');
+    
+    // Generate a new ID
+    const newId = storedCustomers.length > 0 ? Math.max(...storedCustomers.map((customer: Customer) => customer.id)) + 1 : 1;
+
     const newCustomer: Customer = {
-      id: Date.now(),
+      id: newId,
       name,
       phone: Number(phone),
     };
 
     // Save customer to localStorage
-    const storedCustomers = JSON.parse(localStorage.getItem('customers') || '[]');
     localStorage.setItem('customers', JSON.stringify([...storedCustomers, newCustomer]));
 
     // Call onSave callback

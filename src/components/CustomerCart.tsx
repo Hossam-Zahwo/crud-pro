@@ -15,6 +15,8 @@ interface Customer {
 }
 
 interface Sale {
+  saleId: number; // Added unique ID for the sale
+  customerId: number; // Added unique customer ID for the sale
   customerName: string;
   customerPhone: string;
   saleDate: string;
@@ -38,9 +40,18 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
   const [products, setProducts] = useState<Product[]>(getInitialProducts()); // Load initial products
 
   useEffect(() => {
-    const storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
+    let storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
+    
     if (storedCustomers.length > 0) {
-      setCustomer(storedCustomers[storedCustomers.length - 1]);
+      let latestCustomer = storedCustomers[storedCustomers.length - 1];
+      
+      // Assign new ID if customer does not have one
+      if (!latestCustomer.id) {
+        latestCustomer.id = storedCustomers.length > 0 ? Math.max(...storedCustomers.map((customer: Customer) => customer.id)) + 1 : 1;
+        localStorage.setItem("customers", JSON.stringify(storedCustomers));
+      }
+      
+      setCustomer(latestCustomer);
     }
 
     // Initialize cart with quantity
@@ -78,7 +89,12 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       return;
     }
 
+    // Get the current sale ID counter from local storage, or initialize it to 1
+    const currentSaleId = parseInt(localStorage.getItem("saleIdCounter") || "1", 10);
+
     const sale: Sale = {
+      saleId: currentSaleId, // Add the sale ID
+      customerId: customer.id,
       customerName: customer.name,
       customerPhone: customer.phone,
       saleDate: new Date().toISOString(),
@@ -99,8 +115,12 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
     saveProductsToLocalStorage(updatedProducts);
     setProducts(updatedProducts); // Update state with the new product stock
 
+    // Save the sale to local storage
     const storedSales = JSON.parse(localStorage.getItem("sales") || "[]");
     localStorage.setItem("sales", JSON.stringify([...storedSales, sale]));
+
+    // Increment and update the sale ID counter
+    localStorage.setItem("saleIdCounter", (currentSaleId + 1).toString());
 
     alert("Sale has been saved successfully!");
   };
@@ -110,6 +130,7 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       <h2 className="text-2xl font-bold mb-4">Customer Purchases</h2>
       {customer && (
         <div className="mb-4">
+          <p className="text-lg font-semibold">Customer ID: {customer.id}</p>
           <p className="text-lg font-semibold">Customer: {customer.name}</p>
           <p className="text-lg font-semibold">Phone: {customer.phone}</p>
         </div>
@@ -119,22 +140,22 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           {cartProducts.map((product) => (
             <li
               key={product.id}
-              className="flex justify-between items-center flex-col my-1 p-4 bg-gray-100 rounded-lg w-[11rem] max-[1100px]:w-[10rem] max-[475px]:w-[9rem] max-[475px]:flex-col max-[475px]:text-center max-[475px]:gap-[0.5rem] shadow-md"
+              className="flex justify-between items-center my-1 p-4 bg-gray-100 rounded-lg w-52 shadow-md"
             >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-[80px] h-16 object-cover rounded-lg"
-              />
-              <div className="flex justify-between items-center gap-[1rem]">
+              <div>
                 <h3 className="text-lg font-semibold">{product.name}</h3>
                 <p className="text-gray-700">
                   ${product.price} x {product.quantity}
                 </p>
               </div>
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-16 h-16 object-cover rounded-lg"
+              />
               <button
                 onClick={() => removeFromCart(product.id)}
-                className="bg-red-500 text-white p-2  rounded-lg hover:bg-red-600"
+                className="bg-red-500 text-white p-2 ml-4 rounded-lg hover:bg-red-600"
               >
                 X
               </button>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getSalesFromLocalStorage } from '../utils/localStorageUtils'; // Import getSalesFromLocalStorage
+import { getSalesFromLocalStorage } from '../utils/localStorageUtils';
 
 interface Sale {
+  id: number;
   customerName: string;
   customerPhone: string;
   saleDate: string;
@@ -22,17 +23,33 @@ const SalesOverview: React.FC = () => {
     month: 'All',
     day: 'All',
   });
+  const [selectedSales, setSelectedSales] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchedSales = getSalesFromLocalStorage();
     setSales(fetchedSales);
   }, []);
 
+  const toggleSaleSelection = (saleId: number) => {
+    setSelectedSales((prevSelected) =>
+      prevSelected.includes(saleId)
+        ? prevSelected.filter((id) => id !== saleId)
+        : [...prevSelected, saleId]
+    );
+  };
+
+  const deleteSelectedSales = () => {
+    const updatedSales = sales.filter((sale) => !selectedSales.includes(sale.id));
+    setSales(updatedSales);
+    localStorage.setItem('sales', JSON.stringify(updatedSales));
+    setSelectedSales([]);
+    alert('Selected sales have been deleted successfully!');
+  };
+
   // Get available years from sales data
   const availableYears = Array.from(
     new Set(sales.map((sale) => new Date(sale.saleDate).getFullYear()))
   );
-  console.log(sales);
 
   // Filter sales based on selected filters
   const filteredSales = sales.filter((sale) => {
@@ -53,103 +70,144 @@ const SalesOverview: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-600">Sales Overview</h1>
+      <div className='w-full flex justify-between items-center'>
 
-      {/* Accordion for filters */}
-      <div className="accordion bg-gray-100 p-4 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-center">Filters</h2>
-        <div className="flex flex-wrap justify-center gap-4 mb-4">
+        {/* Total sales */}
+        <div className="mt-6 p-4 bg-blue-100 rounded-lg shadow-md text-center">
+          <p className="text-xl font-bold text-blue-600">Total Sales: ${totalSales.toFixed(2)}</p>
+        </div>
 
-          {/* Filter by year */}
-          <div className="flex flex-col items-center">
-            <label className="font-semibold mb-2">Filter by year:</label>
-            <select
-              value={filter.year}
-              onChange={(e) => setFilter({ ...filter, year: e.target.value })}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="All">All</option>
-              {availableYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Accordion for filters */}
+        <div className="accordion bg-gray-100 p-4 rounded-lg shadow-md mb-6">
+          <div className="flex flex-wrap justify-center gap-4 mb-4">
 
-          {/* Filter by month */}
-          <div className="flex flex-col items-center">
-            <label className="font-semibold mb-2">Filter by month:</label>
-            <select
-              value={filter.month}
-              onChange={(e) => setFilter({ ...filter, month: e.target.value })}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="All">All</option>
-              {[...Array(12).keys()].map((month) => (
-                <option key={month} value={month + 1}>
-                  {new Date(0, month).toLocaleString('default', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Filter by year */}
+            <div className="flex flex-col items-center">
+              <label className="font-semibold mb-2">Filter by year:</label>
+              <select
+                value={filter.year}
+                onChange={(e) => setFilter({ ...filter, year: e.target.value })}
+                className="p-2 border rounded bg-white"
+              >
+                <option value="All">All</option>
+                {availableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Filter by day */}
-          <div className="flex flex-col items-center">
-            <label className="font-semibold mb-2">Filter by day:</label>
-            <select
-              value={filter.day}
-              onChange={(e) => setFilter({ ...filter, day: e.target.value })}
-              className="p-2 border rounded bg-white"
-            >
-              <option value="All">All</option>
-              {[...Array(31).keys()].map((day) => (
-                <option key={day} value={day + 1}>
-                  {day + 1}
-                </option>
-              ))}
-            </select>
+            {/* Filter by month */}
+            <div className="flex flex-col items-center">
+              <label className="font-semibold mb-2">Filter by month:</label>
+              <select
+                value={filter.month}
+                onChange={(e) => setFilter({ ...filter, month: e.target.value })}
+                className="p-2 border rounded bg-white"
+              >
+                <option value="All">All</option>
+                {[...Array(12).keys()].map((month) => (
+                  <option key={month} value={month + 1}>
+                    {new Date(0, month).toLocaleString('default', { month: 'long' })}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter by day */}
+            <div className="flex flex-col items-center">
+              <label className="font-semibold mb-2">Filter by day:</label>
+              <select
+                value={filter.day}
+                onChange={(e) => setFilter({ ...filter, day: e.target.value })}
+                className="p-2 border rounded bg-white"
+              >
+                <option value="All">All</option>
+                {[...Array(31).keys()].map((day) => (
+                  <option key={day} value={day + 1}>
+                    {day + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Total sales */}
-      <div className="mt-6 p-4 bg-blue-100 rounded-lg shadow-md text-center">
-        <p className="text-xl font-bold text-blue-600">Total Sales: ${totalSales.toFixed(2)}</p>
-      </div>
-
-      {/* Sales list */}
+      {/* Sales table */}
       <div className="sales-list bg-white p-4 rounded-lg shadow-md">
         {filteredSales.length === 0 ? (
           <p className="text-center text-gray-500">No sales data available for the selected filters.</p>
         ) : (
-          <ul>
-            {filteredSales.map((sale, index) => {
-              const totalPurchases = sale.purchases.reduce((sum, product) => sum + product.price, 0);
-              const discount = totalPurchases - sale.total;
+          <table className="table-auto w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSales.length === filteredSales.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedSales(filteredSales.map((sale) => sale.id));
+                      } else {
+                        setSelectedSales([]);
+                      }
+                    }}
+                  />
+                </th>
+                <th className="border border-gray-300 px-4 py-2">Customer ID</th>
+                <th className="border border-gray-300 px-4 py-2">Customer Name</th>
+                <th className="border border-gray-300 px-4 py-2">Phone</th>
+                <th className="border border-gray-300 px-4 py-2">Date</th>
+                <th className="border border-gray-300 px-4 py-2">Total</th>
+                <th className="border border-gray-300 px-4 py-2">Discount</th>
+                <th className="border border-gray-300 px-4 py-2">Purchases</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSales.map((sale) => {
+                const totalPurchases = sale.purchases.reduce((sum, product) => sum + product.price, 0);
+                const discount = totalPurchases - sale.total;
 
-              return (
-                <li key={index} className="border-b p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-semibold text-blue-600">{sale.customerName}</h3>
-                      <p className="text-gray-700">Phone: {sale.customerPhone}</p>
-                      <p className="text-gray-700">Date: {sale.saleDate}</p>
-                      <p className="text-gray-700">Total: ${sale.total.toFixed(2)}</p>
-                      <p className="text-gray-700">Discount: -${discount.toFixed(2)}</p>
-                      <ul className="ml-4 list-disc">
+                return (
+                  <tr key={sale.id}>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedSales.includes(sale.id)}
+                        onChange={() => toggleSaleSelection(sale.id)}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">{sale.id}</td>
+                    <td className="border border-gray-300 px-4 py-2">{sale.customerName}</td>
+                    <td className="border border-gray-300 px-4 py-2">{sale.customerPhone}</td>
+                    <td className="border border-gray-300 px-4 py-2">{sale.saleDate}</td>
+                    <td className="border border-gray-300 px-4 py-2">${sale.total.toFixed(2)}</td>
+                    <td className="border border-gray-300 px-4 py-2">-${discount.toFixed(2)}</td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <ul className="list-disc pl-4">
                         {sale.purchases.map((product, idx) => (
-                          <li key={idx} className="text-gray-600">
+                          <li key={idx}>
                             {product.name}: ${product.price.toFixed(2)}
                           </li>
                         ))}
                       </ul>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+        {selectedSales.length > 0 && (
+          <button
+            onClick={deleteSelectedSales}
+            className="bg-red-500 text-white p-2 mt-4 rounded-lg hover:bg-red-600"
+          >
+            Delete Selected Sales
+          </button>
         )}
       </div>
     </div>
