@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import './index.css';
 import AddNew from './pages/AddNew';
 import Home from './pages/Home';
-import SalesPage from './pages/SalesPage';
+import SalesOverview from './pages/SalesOverview';
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
           <Route path="/AddNew" element={<AddNew />} />
           <Route path="/about" element={<About />} />
-          <Route path="/sales"  element={<SalesPage />} />
+          <Route path="/SalesOverview"  element={<SalesOverview />} />
         </Routes>
       </div>
     </div>
