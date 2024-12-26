@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 interface CustomerFormProps {
   onSave: (customer: Customer) => void;
+  onCancel: () => void; // Add onCancel prop
 }
 
 export interface Customer {
@@ -10,7 +11,7 @@ export interface Customer {
   phone: number;
 }
 
-const CustomerForm: React.FC<CustomerFormProps> = ({ onSave }) => {
+const CustomerForm: React.FC<CustomerFormProps> = ({ onSave, onCancel }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState<number | ''>('');
 
@@ -73,12 +74,21 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSave }) => {
               required
             />
           </div>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"
-          >
-            Save
-          </button>
+          <div className="flex justify-between">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>

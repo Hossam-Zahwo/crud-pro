@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
-import Header from "../components/Header"; // Import Header
+import Header from "../components/header"; // Import Header
+import { MdAddBusiness } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { FaRegEdit } from "react-icons/fa";
+import { GrView } from "react-icons/gr";
 import CustomerCart from "../components/CustomerCart"; // Import CustomerCart
 import CustomerForm, { Customer } from "../components/CustomerForm"; // Import CustomerForm
-import { FaHashtag } from "react-icons/fa"; // Import FaHashtag for icon
 import AddProductForm from "../components/AddProductForm"; // Import AddProductForm for editing
 import { getInitialProducts, saveProductsToLocalStorage } from "../utils/localStorageUtils";
 import { Product } from "../data/productData";
+import SearchandFilters from "../components/SearchandFilters";
 
 function Home() {
   const [subCategories, setSubCategories] = useState([
@@ -18,7 +22,9 @@ function Home() {
     { name: 'Pocket', for: ['Women'] },
     { name: 'Dress', for: ['Women'] },
   ]);
-
+  const [maxPrice, setMaxPrice] = useState<number>(Infinity);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [products, setProducts] = useState<Product[]>(getInitialProducts());
   const [customerPurchases, setCustomerPurchases] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // State to manage the selected product for view
@@ -27,7 +33,8 @@ function Home() {
   const [customer, setCustomer] = useState<Customer | null>(null); // State to manage customer data
   const [showCustomerForm, setShowCustomerForm] = useState<boolean>(false); // State to control customer form display
   const [currentDate, setCurrentDate] = useState<string>(new Date().toLocaleDateString()); // State to store current date
-
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const categories = Array.from(new Set(products.map((product) => product.category))); // Unique categories
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(debouncedSearchQuery);
@@ -42,11 +49,6 @@ function Home() {
     saveProductsToLocalStorage(products);
   }, [products]);
 
-  const filteredProducts = products.filter((product) => {
-    const searchMatch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-                         product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-    return searchMatch;
-  });
 
   const handleDelete = (id: number) => {
     const updatedProducts = products.filter(product => product.id !== id);
@@ -101,6 +103,35 @@ function Home() {
   const handleSaveCustomer = (customer: Customer) => {
     setCustomer(customer); // Save customer data
   };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMinPrice(parseFloat(e.target.value));
+  };
+  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMaxPrice(parseFloat(e.target.value) || Infinity);
+  };
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+  };
+
+
+  const filteredProducts = products.filter((product) => {
+    const searchMatch =
+      product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+  
+    const categoryMatch = selectedCategory
+      ? product.category.toLowerCase() === selectedCategory.toLowerCase()
+      : true;
+  
+    const priceMatch =
+      product.price >= minPrice && product.price <= maxPrice;
+  
+    return searchMatch && categoryMatch && priceMatch;
+  });
+  
 
   return (
     <div className="container mx-auto pt-16 flex">
@@ -123,7 +154,18 @@ function Home() {
           setSearchQuery={setDebouncedSearchQuery} // Pass search query handler to header
           onSaveCustomer={handleSaveCustomer} // Pass handleSaveCustomer to header
         />
-
+  {/* Search and Filter Section */}
+  <SearchandFilters
+        searchQuery={searchQuery}
+        handleSearchChange={handleSearchChange}
+        minPrice={minPrice}
+        handleMinPriceChange={handleMinPriceChange}
+        maxPrice={maxPrice}
+        handleMaxPriceChange={handleMaxPriceChange}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        handleCategoryChange={handleCategoryChange}
+      />
         {/* Product List Section */}
         <section className="pt-8 pb-8 w-full">
           <div className="products grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -133,38 +175,55 @@ function Home() {
                 key={product.id}
               >
                 <div className="flex flex-col items-center">
-                  <FaHashtag className="text-blue-400 mb-2" />
-                  <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded-lg mb-4"/>
-                  <h4 className="text-[20px] font-semibold uppercase text-blue-400">{product.name}</h4>
+                  
+                  <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4"/>
+                  
                 </div>
-                <p className="text-gray-700 text-lg capitalize text-center">{product.description}</p>
-                <p className="text-gray-700 text-lg text-center">{product.price}$</p>
+              <div className="w-full flex justify-between items-center">
+<div className="w-full flex justify-between items-center">
+                    <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
+                    <p className="text-gray-700 text-lg capitalize text-center p-2 mt-4">{product.description}</p>
+                    <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
+                  
+</div>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="bg-white text-blue-500 flex justify-center items-center border border-blue-500  p-2 mt-4 w-10 h-10 font-bold hover:bg-blue-600 hover:text-white rounded-full"
+                  >
+                  <MdAddBusiness />
+                  </button>
+              </div >
+              
 
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  className="bg-blue-500 text-white p-2 mt-4 w-full hover:bg-blue-600 rounded-lg"
-                >
-                  Add to Cart
-                </button>
-
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  className="bg-red-500 text-white p-2 mt-2 w-full hover:bg-red-600 rounded-lg"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => handleEdit(product)}
-                  className="bg-yellow-500 text-white p-2 mt-2 w-full hover:bg-yellow-600 rounded-lg"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleView(product)}
-                  className="bg-green-500 text-white p-2 mt-2 w-full hover:bg-green-600 rounded-lg"
-                >
-                  View
-                </button>
+<div className="w-full flex justify-between items-center">
+    <div className="flex justify-start items-center">
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="bg-white text-red-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-red-600 hover:text-white rounded-lg"
+                    >
+                      <RiDeleteBin6Line />
+                    </button>
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="bg-white text-yellow-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-yellow-600 hover:text-white rounded-lg"
+                    >
+                    <FaRegEdit />
+                    </button>
+                    <button
+                      onClick={() => handleView(product)}
+                      className="bg-white text-green-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-green-600 hover:text-white rounded-lg"
+                    >
+                      <GrView />
+                    </button>
+    </div>
+ 
+<div>
+   {/* عرض المخزون */}
+   <p className={`text-center p-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'} flex justify-end items-center p-2 font-bold`}>
+                {product.stock > 0 ? `In Stock: ${product.stock}` : 'Out of Stock'}
+              </p>
+</div>
+</div>  
               </div>
             ))}
           </div>

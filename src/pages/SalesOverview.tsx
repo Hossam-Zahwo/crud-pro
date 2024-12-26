@@ -123,25 +123,31 @@ const SalesOverview: React.FC = () => {
           <p className="text-center text-gray-500">No sales data available for the selected filters.</p>
         ) : (
           <ul>
-            {filteredSales.map((sale, index) => (
-              <li key={index} className="border-b p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-600">{sale.customerName}</h3>
-                    <p className="text-gray-700">Phone: {sale.customerPhone}</p>
-                    <p className="text-gray-700">Date: {sale.saleDate}</p>
-                    <p className="text-gray-700">Total: ${sale.total.toFixed(2)}</p>
-                    <ul className="ml-4 list-disc">
-                      {sale.purchases.map((product, idx) => (
-                        <li key={idx} className="text-gray-600">
-                          {product.name}: ${product.price.toFixed(2)}
-                        </li>
-                      ))}
-                    </ul>
+            {filteredSales.map((sale, index) => {
+              const totalPurchases = sale.purchases.reduce((sum, product) => sum + product.price, 0);
+              const discount = totalPurchases - sale.total;
+
+              return (
+                <li key={index} className="border-b p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-600">{sale.customerName}</h3>
+                      <p className="text-gray-700">Phone: {sale.customerPhone}</p>
+                      <p className="text-gray-700">Date: {sale.saleDate}</p>
+                      <p className="text-gray-700">Total: ${sale.total.toFixed(2)}</p>
+                      <p className="text-gray-700">Discount: -${discount.toFixed(2)}</p>
+                      <ul className="ml-4 list-disc">
+                        {sale.purchases.map((product, idx) => (
+                          <li key={idx} className="text-gray-600">
+                            {product.name}: ${product.price.toFixed(2)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

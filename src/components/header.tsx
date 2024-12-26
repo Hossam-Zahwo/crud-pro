@@ -17,8 +17,8 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery, onSaveCust
   };
 
   return (
-    <>
-      <nav className="fixed top-0 left-0 w-full p-4 z-10 shadow-md bg-white">
+    <nav className="flex justify-center items-center">
+      <nav className="fixed top-0 left-0  p-4 z-10 shadow-md bg-white mx-5 w-[90%] rounded-full">
         <div className="flex justify-between items-center px-36">
           <div className="text-xl font-semibold">Order</div>
 
@@ -44,12 +44,15 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery, onSaveCust
       </nav>
 
       {showCustomerForm && (
-        <CustomerForm onSave={(customer) => {
-          onSaveCustomer(customer);
-          setShowCustomerForm(false); // Hide the form after saving customer
-        }} />
+        <CustomerForm
+          onSave={(customer) => {
+            onSaveCustomer(customer);
+            setShowCustomerForm(false); // Hide the form after saving customer
+          }}
+          onCancel={() => setShowCustomerForm(false)} // Handle form cancellation
+        />
       )}
-    </>
+    </nav>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Product } from "../data/productData";
+import { getInitialProducts, saveProductsToLocalStorage } from "../utils/localStorageUtils";
 
 interface CustomerCartProps {
   purchases: Product[];
@@ -32,6 +33,9 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
 }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
+  const [discount, setDiscount] = useState<number>(0);
+  const [discountType, setDiscountType] = useState<string>('percentage'); // 'percentage' or 'fixed'
+  const [products, setProducts] = useState<Product[]>(getInitialProducts()); // Load initial products
 
   useEffect(() => {
     const storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
@@ -57,7 +61,16 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
     0
   );
   const tax = total * 0.1;
-  const totalWithTax = total + tax;
+
+  // Calculate discount
+  const discountAmount = discountType === 'percentage' ? total * (discount / 100) : discount;
+
+  // Ensure discount is not negative and does not exceed total
+  const effectiveDiscount = Math.max(Math.min(discountAmount, total + tax), 0);
+  const totalWithTaxAndDiscount = total + tax - effectiveDiscount;
+
+  // Ensure the final total is not negative
+  const finalTotal = Math.max(totalWithTaxAndDiscount, 0);
 
   const saveSaleToLocalStorage = () => {
     if (!customer) {
@@ -70,8 +83,21 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       customerPhone: customer.phone,
       saleDate: new Date().toISOString(),
       purchases: cartProducts,
-      total: totalWithTax,
+      total: finalTotal,
     };
+
+    // Update product stock
+    const updatedProducts = products.map((product) => {
+      const cartProduct = cartProducts.find((item) => item.id === product.id);
+      if (cartProduct) {
+        return { ...product, stock: product.stock - cartProduct.quantity };
+      }
+      return product;
+    });
+
+    // Save updated products to local storage
+    saveProductsToLocalStorage(updatedProducts);
+    setProducts(updatedProducts); // Update state with the new product stock
 
     const storedSales = JSON.parse(localStorage.getItem("sales") || "[]");
     localStorage.setItem("sales", JSON.stringify([...storedSales, sale]));
@@ -80,7 +106,7 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
   };
 
   return (
-    <div className="container mx-auto p-6 sticky">
+    <div className="container mx-auto p-6 sticky bg-slate-300 rounded-md">
       <h2 className="text-2xl font-bold mb-4">Customer Purchases</h2>
       {customer && (
         <div className="mb-4">
@@ -88,12 +114,12 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           <p className="text-lg font-semibold">Phone: {customer.phone}</p>
         </div>
       )}
-      <div className="overflow-y-scroll" style={{ maxHeight: "400px", width: "100%" }}>
+      <div className="" style={{ maxHeight: "400px", width: "100%" }}>
         <ul className="w-full">
           {cartProducts.map((product) => (
             <li
               key={product.id}
-              className="flex justify-between items-center p-4 bg-gray-100 rounded-lg w-52 shadow-md"
+              className="flex justify-between items-center my-1 p-4 bg-gray-100 rounded-lg w-52 shadow-md"
             >
               <div>
                 <h3 className="text-lg font-semibold">{product.name}</h3>
@@ -116,10 +142,33 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           ))}
         </ul>
       </div>
+      
+      {/* Discount Section */}
+      <div className="mt-4 flex flex-col items-center space-x-2 p-4 bg-white rounded-lg shadow-md">
+        <label className="font-semibold">Discount:</label>
+        <div className="flex">
+          <input
+            type="number"
+            value={discount}
+            onChange={(e) => setDiscount(Math.max(Number(e.target.value), 0))}
+            className="border p-1 rounded w-14"
+          />
+          <select
+            value={discountType}
+            onChange={(e) => setDiscountType(e.target.value)}
+            className="border p-1 rounded w-14"
+          >
+            <option value="percentage"> (%)</option>
+            <option value="fixed"> ($)</option>
+          </select>
+        </div>
+      </div>
+
       <div className="mt-6 p-4 bg-gray-200 rounded-lg shadow-md">
         <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
         <p className="text-lg font-semibold">Tax: ${tax.toFixed(2)}</p>
-        <p className="text-xl font-bold">Total with Tax: ${totalWithTax.toFixed(2)}</p>
+        <p className="text-lg font-semibold">Discount: -${effectiveDiscount.toFixed(2)}</p>
+        <p className="text-xl font-bold">Total with Tax and Discount: ${finalTotal.toFixed(2)}</p>
       </div>
       <button
         onClick={saveSaleToLocalStorage}

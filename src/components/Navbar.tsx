@@ -5,7 +5,7 @@ import { MdCreateNewFolder } from "react-icons/md";
 
 function Navbar() {
   return (
-    <nav className="fixed flex flex-col justify-center items-center  z-50 top-0  text-black h-screen w-32">
+    <nav className="fixed flex flex-col justify-center items-center bg-white  z-50 top-0  text-black h-screen w-32">
       <ul className="w-full">
         <li>
           <NavLink
