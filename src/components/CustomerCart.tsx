@@ -15,8 +15,8 @@ interface Customer {
 }
 
 interface Sale {
-  saleId: number; // Added unique ID for the sale
-  customerId: number; // Added unique customer ID for the sale
+  saleId: number;
+  customerId: number;
   customerName: string;
   customerPhone: string;
   saleDate: string;
@@ -25,7 +25,7 @@ interface Sale {
 }
 
 interface CartProduct extends Product {
-  quantity: number; // Add quantity to track duplicates
+  quantity: number;
 }
 
 const CustomerCart: React.FC<CustomerCartProps> = ({
@@ -36,25 +36,42 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [cartProducts, setCartProducts] = useState<CartProduct[]>([]);
   const [discount, setDiscount] = useState<number>(0);
-  const [discountType, setDiscountType] = useState<string>('percentage'); // 'percentage' or 'fixed'
-  const [products, setProducts] = useState<Product[]>(getInitialProducts()); // Load initial products
+  const [discountType, setDiscountType] = useState<string>("percentage");
+  const [products, setProducts] = useState<Product[]>(getInitialProducts());
 
   useEffect(() => {
     let storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
-    
+
+    // جلب عداد الـ id الحالي أو البدء من 1
+    let customerIdCounter = parseInt(localStorage.getItem("customerIdCounter") || "1", 10);
+
     if (storedCustomers.length > 0) {
       let latestCustomer = storedCustomers[storedCustomers.length - 1];
-      
-      // Assign new ID if customer does not have one
+
+      // إذا لم يكن لدى العميل id، قم بتعيين id جديد
       if (!latestCustomer.id) {
-        latestCustomer.id = storedCustomers.length > 0 ? Math.max(...storedCustomers.map((customer: Customer) => customer.id)) + 1 : 1;
+        latestCustomer.id = customerIdCounter;
+        customerIdCounter += 1; // زيادة العداد
         localStorage.setItem("customers", JSON.stringify(storedCustomers));
+        localStorage.setItem("customerIdCounter", customerIdCounter.toString());
       }
-      
+
       setCustomer(latestCustomer);
+    } else {
+      // إذا لم يكن هناك عملاء، أنشئ عميل جديد مع id=1
+      const newCustomer: Customer = {
+        id: customerIdCounter,
+        name: "New Customer",
+        phone: 123456789,
+      };
+      storedCustomers.push(newCustomer);
+      customerIdCounter += 1; // زيادة العداد
+      localStorage.setItem("customers", JSON.stringify(storedCustomers));
+      localStorage.setItem("customerIdCounter", customerIdCounter.toString());
+      setCustomer(newCustomer);
     }
 
-    // Initialize cart with quantity
+    // إعداد السلة مع الكميات
     const updatedCart = purchases.reduce((acc: CartProduct[], product) => {
       const existingProduct = acc.find((item) => item.id === product.id);
       if (existingProduct) {
@@ -73,14 +90,11 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
   );
   const tax = total * 0.1;
 
-  // Calculate discount
-  const discountAmount = discountType === 'percentage' ? total * (discount / 100) : discount;
+  const discountAmount = discountType === "percentage" ? total * (discount / 100) : discount;
 
-  // Ensure discount is not negative and does not exceed total
   const effectiveDiscount = Math.max(Math.min(discountAmount, total + tax), 0);
   const totalWithTaxAndDiscount = total + tax - effectiveDiscount;
 
-  // Ensure the final total is not negative
   const finalTotal = Math.max(totalWithTaxAndDiscount, 0);
 
   const saveSaleToLocalStorage = () => {
@@ -89,11 +103,10 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       return;
     }
 
-    // Get the current sale ID counter from local storage, or initialize it to 1
     const currentSaleId = parseInt(localStorage.getItem("saleIdCounter") || "1", 10);
 
     const sale: Sale = {
-      saleId: currentSaleId, // Add the sale ID
+      saleId: currentSaleId,
       customerId: customer.id,
       customerName: customer.name,
       customerPhone: customer.phone,
@@ -102,7 +115,6 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       total: finalTotal,
     };
 
-    // Update product stock
     const updatedProducts = products.map((product) => {
       const cartProduct = cartProducts.find((item) => item.id === product.id);
       if (cartProduct) {
@@ -111,15 +123,12 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       return product;
     });
 
-    // Save updated products to local storage
     saveProductsToLocalStorage(updatedProducts);
-    setProducts(updatedProducts); // Update state with the new product stock
+    setProducts(updatedProducts);
 
-    // Save the sale to local storage
     const storedSales = JSON.parse(localStorage.getItem("sales") || "[]");
     localStorage.setItem("sales", JSON.stringify([...storedSales, sale]));
 
-    // Increment and update the sale ID counter
     localStorage.setItem("saleIdCounter", (currentSaleId + 1).toString());
 
     alert("Sale has been saved successfully!");
@@ -163,8 +172,7 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           ))}
         </ul>
       </div>
-      
-      {/* Discount Section */}
+
       <div className="mt-4 flex flex-col items-center space-x-2 p-4 bg-white rounded-lg shadow-md">
         <label className="font-semibold">Discount:</label>
         <div className="flex">
@@ -189,7 +197,9 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
         <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
         <p className="text-lg font-semibold">Tax: ${tax.toFixed(2)}</p>
         <p className="text-lg font-semibold">Discount: -${effectiveDiscount.toFixed(2)}</p>
-        <p className="text-xl font-bold">Total with Tax and Discount: ${finalTotal.toFixed(2)}</p>
+        <p className="text-xl font-bold">
+          Total with Tax and Discount: ${finalTotal.toFixed(2)}
+        </p>
       </div>
       <button
         onClick={saveSaleToLocalStorage}

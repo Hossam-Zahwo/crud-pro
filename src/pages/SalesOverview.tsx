@@ -6,6 +6,7 @@ interface Sale {
   customerName: string;
   customerPhone: string;
   saleDate: string;
+  customerId: string;
   purchases: Product[];
   total: number;
 }
@@ -24,6 +25,8 @@ const SalesOverview: React.FC = () => {
     day: 'All',
   });
   const [selectedSales, setSelectedSales] = useState<number[]>([]);
+  const [selectedSaleDetails, setSelectedSaleDetails] = useState<Sale | null>(null); // لتخزين تفاصيل المبيع المختار
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // للتحكم في حالة نافذة التفاصيل
 
   useEffect(() => {
     const fetchedSales = getSalesFromLocalStorage();
@@ -38,12 +41,29 @@ const SalesOverview: React.FC = () => {
     );
   };
 
+  const deleteSale = (saleId: number) => {
+    const updatedSales = sales.filter((sale) => sale.id !== saleId);
+    setSales(updatedSales);
+    localStorage.setItem('sales', JSON.stringify(updatedSales));
+    alert('Sale has been deleted successfully!');
+  };
+
   const deleteSelectedSales = () => {
     const updatedSales = sales.filter((sale) => !selectedSales.includes(sale.id));
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     setSelectedSales([]);
     alert('Selected sales have been deleted successfully!');
+  };
+
+  const viewSaleDetails = (sale: Sale) => {
+    setSelectedSaleDetails(sale); // تعيين تفاصيل المبيع المختار
+    setIsModalOpen(true); // فتح نافذة التفاصيل
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false); // إغلاق نافذة التفاصيل
+    setSelectedSaleDetails(null);
   };
 
   // Get available years from sales data
@@ -164,6 +184,7 @@ const SalesOverview: React.FC = () => {
                 <th className="border border-gray-300 px-4 py-2">Total</th>
                 <th className="border border-gray-300 px-4 py-2">Discount</th>
                 <th className="border border-gray-300 px-4 py-2">Purchases</th>
+                <th className="border border-gray-300 px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -180,7 +201,7 @@ const SalesOverview: React.FC = () => {
                         onChange={() => toggleSaleSelection(sale.id)}
                       />
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">{sale.id}</td>
+                    <td className="border border-gray-300 px-4 py-2">{sale.customerId}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerName}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerPhone}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.saleDate}</td>
@@ -194,6 +215,20 @@ const SalesOverview: React.FC = () => {
                           </li>
                         ))}
                       </ul>
+                    </td>
+                    <td className="border flex border-gray-300 px-4 py-2 text-center h-auto">
+                      <button
+                        onClick={() => viewSaleDetails(sale)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => deleteSale(sale.id)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 ml-2"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 );
@@ -210,6 +245,34 @@ const SalesOverview: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* Modal for sale details */}
+      {isModalOpen && selectedSaleDetails && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg w-1/2">
+            <h2 className="text-2xl font-bold mb-4">Sale Details</h2>
+            <p><strong>Customer ID:</strong> {selectedSaleDetails.customerId}</p>
+            <p><strong>Customer Name:</strong> {selectedSaleDetails.customerName}</p>
+            <p><strong>Phone:</strong> {selectedSaleDetails.customerPhone}</p>
+            <p><strong>Sale Date:</strong> {selectedSaleDetails.saleDate}</p>
+            <p><strong>Total:</strong> ${selectedSaleDetails.total.toFixed(2)}</p>
+            <p><strong>Purchases:</strong></p>
+            <ul className="list-disc pl-4">
+              {selectedSaleDetails.purchases.map((product, idx) => (
+                <li key={idx}>
+                  {product.name}: ${product.price.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={closeModal}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
