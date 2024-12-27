@@ -33,13 +33,16 @@ const SalesOverview: React.FC = () => {
     setSales(fetchedSales);
   }, []);
 
-  const toggleSaleSelection = (saleId: number) => {
-    setSelectedSales((prevSelected) =>
-      prevSelected.includes(saleId)
-        ? prevSelected.filter((id) => id !== saleId)
-        : [...prevSelected, saleId]
-    );
+  const toggleSaleSelection = (index: number) => {
+    if (selectedSales.includes(index)) {
+      setSelectedSales(selectedSales.filter((i) => i !== index)); 
+    } else {
+      setSelectedSales([...selectedSales, index]);  
+    }
   };
+  
+  
+  
 
   const deleteSale = (saleId: number) => {
     const updatedSales = sales.filter((sale) => sale.id !== saleId);
@@ -157,7 +160,7 @@ const SalesOverview: React.FC = () => {
       </div>
 
       {/* Sales table */}
-      <div className="sales-list bg-white p-4 rounded-lg shadow-md">
+      <div className="sales-list bg-white p-4 rounded-lg shadow-md overflow-auto">
         {filteredSales.length === 0 ? (
           <p className="text-center text-gray-500">No sales data available for the selected filters.</p>
         ) : (
@@ -165,17 +168,17 @@ const SalesOverview: React.FC = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-300 px-4 py-2">
-                  <input
+                   { <input
                     type="checkbox"
                     checked={selectedSales.length === filteredSales.length}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedSales(filteredSales.map((sale) => sale.id));
+                        setSelectedSales(filteredSales.map((_, index) => index));
                       } else {
                         setSelectedSales([]);
                       }
                     }}
-                  />
+                  /> } 
                 </th>
                 <th className="border border-gray-300 px-4 py-2">Customer ID</th>
                 <th className="border border-gray-300 px-4 py-2">Customer Name</th>
@@ -188,20 +191,20 @@ const SalesOverview: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredSales.map((sale) => {
+              {filteredSales.map((sale, index) => {
                 const totalPurchases = sale.purchases.reduce((sum, product) => sum + product.price, 0);
                 const discount = totalPurchases - sale.total;
-
+                console.log(sale.id);
                 return (
-                  <tr key={sale.id}>
-                    <td className="border border-gray-300 px-4 py-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedSales.includes(sale.id)}
-                        onChange={() => toggleSaleSelection(sale.id)}
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{sale.customerId}</td>
+                  <tr key={index}>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedSales.includes(index)}
+                    onChange={() => toggleSaleSelection(index)}
+                  />
+                  </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerName}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerPhone}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.saleDate}</td>
@@ -244,6 +247,7 @@ const SalesOverview: React.FC = () => {
             Delete Selected Sales
           </button>
         )}
+
       </div>
 
       {/* Modal for sale details */}
