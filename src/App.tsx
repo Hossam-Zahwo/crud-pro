@@ -5,7 +5,7 @@ import './index.css';
 import AddNew from './pages/AddNew';
 import Home from './pages/Home';
 import SalesOverview from './pages/SalesOverview';
-
+import Dashboard from './pages/Dashboard';
 function App() {
   return (
     <div className="grid">
@@ -16,6 +16,7 @@ function App() {
           <Route path="/AddNew" element={<AddNew />} />
           <Route path="/about" element={<About />} />
           <Route path="/SalesOverview"  element={<SalesOverview />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </div>

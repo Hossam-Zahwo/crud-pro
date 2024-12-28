@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { FaHome, FaInfoCircle, FaPhone, FaHashtag } from 'react-icons/fa';
 import { MdCreateNewFolder } from "react-icons/md";
+import { BsBuildingDash } from "react-icons/bs";
 
 function Navbar() {
   return (
@@ -40,6 +41,18 @@ function Navbar() {
             }
           >
             <FaHashtag className="text-lg" /> 
+          </NavLink>
+        </li>
+        <li className="mb-4">
+          <NavLink
+            to="/Dashboard"
+            className={({ isActive }) =>
+              isActive
+                ? "py-2 px-2 bg-gray-400 flex justify-center items-center"
+                : "py-2 px-2 hover:bg-gray-500 flex justify-center items-center shadow-md"
+            }
+          >
+            <BsBuildingDash  className="text-lg" /> 
           </NavLink>
         </li>
         <li className="mb-4">

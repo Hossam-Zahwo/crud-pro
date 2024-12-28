@@ -40,48 +40,49 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
 
   return (
     <div className="mb-6 p-6 border rounded-lg shadow-md bg-gray-50 w-full max-w-4xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700 text-center">Add Product</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* حقل اسم المنتج */}
-        <div>
-          <label className="block mb-2 text-gray-700">Product Name</label>
-          <input
-            type="text"
-            name="name"
-            value={newProduct.name}
-            onChange={handleInputChange}
-            placeholder="Product Name"
-            className="border p-3 w-full rounded-lg"
-          />
-        </div>
+      <h2 className="text-xl font-semibold w-full mb-4 text-gray-700 text-center">Add Product</h2>
+      <div className="flex flex-col w-full justify-center items-center">
+<div className='grid grid-cols-3 gap-4 w-full'>
+          {/* حقل اسم المنتج */}
+          <div>
+            <label className="block mb-2 text-gray-700">Product Name</label>
+            <input
+              type="text"
+              name="name"
+              value={newProduct.name}
+              onChange={handleInputChange}
+              placeholder="Product Name"
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
+  
+          {/* حقل السعر */}
+          <div>
+            <label className="block mb-2 text-gray-700">Price</label>
+            <input
+              type="number"
+              name="price"
+              value={newProduct.price}
+              onChange={handleInputChange}
+              placeholder="Price"
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
+  
+          {/* حقل المخزون */}
+          <div>
+            <label className="block mb-2 text-gray-700">Stock</label>
+            <input
+              type="number"
+              name="stock"
+              value={newProduct.stock}
+              onChange={handleInputChange}
+              placeholder="Stock"
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
 
-        {/* حقل السعر */}
-        <div>
-          <label className="block mb-2 text-gray-700">Price</label>
-          <input
-            type="number"
-            name="price"
-            value={newProduct.price}
-            onChange={handleInputChange}
-            placeholder="Price"
-            className="border p-3 w-full rounded-lg"
-          />
-        </div>
-
-        {/* حقل المخزون */}
-        <div>
-          <label className="block mb-2 text-gray-700">Stock</label>
-          <input
-            type="number"
-            name="stock"
-            value={newProduct.stock}
-            onChange={handleInputChange}
-            placeholder="Stock"
-            className="border p-3 w-full rounded-lg"
-          />
-        </div>
-
-        {/* حقل الفئة */}
+                  {/* حقل الفئة */}
         <div>
           <label className="block mb-2 text-gray-700">Category</label>
           <select
@@ -134,26 +135,34 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
             ))}
           </select>
         </div>
+</div>
 
-        {/* حقل الصورة */}
-        <div>
-          <label className="block mb-2 text-gray-700">Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="border p-3 w-full rounded-lg"
-          />
+
+<div  className="flex justify-between items-center mt-4 gap-4 w-full">
+  
+          {/* حقل الصورة */}
+          <div>
+            <label className="block mb-2 text-gray-700">Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
+            {/* زر الإضافة */}
+        <div className='flex justify-end items-end'>
+          <button
+            onClick={handleAddClick}
+            className="mt-4 flex justify-center items-center bg-blue-500 text-white h-10 p-3 w-32 hover:bg-blue-600 rounded-lg"
+          >
+            Add Product
+          </button>
         </div>
+</div >
       </div>
 
-      {/* زر الإضافة */}
-      <button
-        onClick={handleAddClick}
-        className="mt-4 bg-blue-500 text-white p-3 w-full hover:bg-blue-600 rounded-lg"
-      >
-        Add Product
-      </button>
+    
     </div>
   );
 };
