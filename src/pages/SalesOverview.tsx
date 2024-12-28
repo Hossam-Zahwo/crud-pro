@@ -44,21 +44,21 @@ const SalesOverview: React.FC = () => {
   
   
 
-  const deleteSale = (saleId: number) => {
-    const updatedSales = sales.filter((sale) => sale.id !== saleId);
+  const deleteSale = (index: number) => {
+    const updatedSales = sales.filter((_, i) => i !== index);
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     alert('Sale has been deleted successfully!');
   };
 
   const deleteSelectedSales = () => {
-    const updatedSales = sales.filter((sale) => !selectedSales.includes(sale.id));
+    const updatedSales = sales.filter((_, index) => !selectedSales.includes(index)); // حذف بناءً على index
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     setSelectedSales([]);
     alert('Selected sales have been deleted successfully!');
   };
-
+  
   const viewSaleDetails = (sale: Sale) => {
     setSelectedSaleDetails(sale); // تعيين تفاصيل المبيع المختار
     setIsModalOpen(true); // فتح نافذة التفاصيل
@@ -227,7 +227,7 @@ const SalesOverview: React.FC = () => {
                         View
                       </button>
                       <button
-                        onClick={() => deleteSale(sale.id)}
+                        onClick={() => deleteSale(index)}
                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 ml-2"
                       >
                         Delete
