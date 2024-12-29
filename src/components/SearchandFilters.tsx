@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getInitialProducts, saveProductsToLocalStorage } from '../utils/localStorageUtils'; // Import save and get functions
 import { Product } from '../data/productData'; // Import Product type
 
@@ -26,13 +26,22 @@ function SearchandFilters({
   handleCategoryChange,
 }: SearchandFiltersProps) {
   
-  // Initialize products from localStorage
-  const products = getInitialProducts();
+  const [products, setProducts] = useState<Product[]>(getInitialProducts());
 
   // Save updated products to localStorage on any change
   useEffect(() => {
     saveProductsToLocalStorage(products);
   }, [products]);
+
+  // Apply filters
+  const filteredProducts = products
+    .filter(product => 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      product.category.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter(product => product.price >= minPrice)
+    .filter(product => maxPrice === Infinity ? true : product.price <= maxPrice)
+    .filter(product => selectedCategory === '' ? true : product.category === selectedCategory);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 mb-6 w-full">
@@ -85,6 +94,16 @@ function SearchandFilters({
             </option>
           ))}
         </select>
+      </div>
+      <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1">
+        <h2 className="text-lg font-semibold mb-4 text-gray-700">Filtered Products</h2>
+        <ul>
+          {filteredProducts.map(product => (
+            <li key={product.id}>
+              {product.name} - ${product.price} - {product.category}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

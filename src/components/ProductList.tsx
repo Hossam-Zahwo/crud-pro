@@ -16,7 +16,7 @@ const ProductList: React.FC<ProductListProps> = ({
   setNewProduct,
   handleStockChange
 }) => {
-  
+
   const handleDeleteProduct = (id: number) => {
     deleteProduct(id);
     saveProductsToLocalStorage(products.filter(product => product.id !== id)); // Update localStorage
@@ -33,7 +33,7 @@ const ProductList: React.FC<ProductListProps> = ({
   return (
     <div className="w-full">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">Product List</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-1  md:grid-cols-3  md:gap-[1px]">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 md:gap-[1px]">
         {products.map((product) => (
           <div
             key={product.id}
@@ -47,6 +47,8 @@ const ProductList: React.FC<ProductListProps> = ({
               />
               <h3 className="font-semibold text-lg">{product.name}</h3>
               <p>${product.price}</p>
+              {/* عرض سعر الجملة */}
+              <p className="text-gray-500">Wholesale Price: ${product.wholesalePrice}</p>
               <p>{product.category}</p>
               <p>Size: {product.size}</p>
               <p>Stock: {product.stock}</p>

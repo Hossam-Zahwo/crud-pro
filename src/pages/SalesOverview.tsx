@@ -25,8 +25,8 @@ const SalesOverview: React.FC = () => {
     day: 'All',
   });
   const [selectedSales, setSelectedSales] = useState<number[]>([]);
-  const [selectedSaleDetails, setSelectedSaleDetails] = useState<Sale | null>(null); // لتخزين تفاصيل المبيع المختار
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // للتحكم في حالة نافذة التفاصيل
+  const [selectedSaleDetails, setSelectedSaleDetails] = useState<Sale | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchedSales = getSalesFromLocalStorage();
@@ -35,24 +35,24 @@ const SalesOverview: React.FC = () => {
 
   const toggleSaleSelection = (index: number) => {
     if (selectedSales.includes(index)) {
-      setSelectedSales(selectedSales.filter((i) => i !== index)); 
+      setSelectedSales(selectedSales.filter((i) => i !== index));
     } else {
-      setSelectedSales([...selectedSales, index]);  
+      setSelectedSales([...selectedSales, index]);
     }
   };
   
   
   
 
-  const deleteSale = (index: number) => {
-    const updatedSales = sales.filter((_, i) => i !== index);
+  const deleteSale = (saleId: number) => {
+    const updatedSales = sales.filter((sale) => sale.id !== saleId);
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     alert('Sale has been deleted successfully!');
   };
 
   const deleteSelectedSales = () => {
-    const updatedSales = sales.filter((_, index) => !selectedSales.includes(index)); // حذف بناءً على index
+    const updatedSales = sales.filter((sale) => !selectedSales.includes(sale.id));
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     setSelectedSales([]);
@@ -60,21 +60,19 @@ const SalesOverview: React.FC = () => {
   };
   
   const viewSaleDetails = (sale: Sale) => {
-    setSelectedSaleDetails(sale); // تعيين تفاصيل المبيع المختار
-    setIsModalOpen(true); // فتح نافذة التفاصيل
+    setSelectedSaleDetails(sale);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); // إغلاق نافذة التفاصيل
+    setIsModalOpen(false);
     setSelectedSaleDetails(null);
   };
 
-  // Get available years from sales data
   const availableYears = Array.from(
     new Set(sales.map((sale) => new Date(sale.saleDate).getFullYear()))
   );
 
-  // Filter sales based on selected filters
   const filteredSales = sales.filter((sale) => {
     const saleDate = new Date(sale.saleDate);
     const saleMonth = saleDate.getMonth() + 1;
@@ -88,23 +86,19 @@ const SalesOverview: React.FC = () => {
     return isMonthMatch && isYearMatch && isDayMatch;
   });
 
-  // Calculate totals
   const totalSales = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
 
   return (
     <div className="container mx-auto p-6">
       <div className='w-full flex justify-between items-center'>
 
-        {/* Total sales */}
         <div className="mt-6 p-4 bg-blue-100 rounded-lg shadow-md text-center">
           <p className="text-xl font-bold text-blue-600">Total Sales: ${totalSales.toFixed(2)}</p>
         </div>
 
-        {/* Accordion for filters */}
         <div className="accordion bg-gray-100 p-4 rounded-lg shadow-md mb-6">
           <div className="flex flex-wrap justify-center gap-4 mb-4">
 
-            {/* Filter by year */}
             <div className="flex flex-col items-center">
               <label className="font-semibold mb-2">Filter by year:</label>
               <select
@@ -121,7 +115,6 @@ const SalesOverview: React.FC = () => {
               </select>
             </div>
 
-            {/* Filter by month */}
             <div className="flex flex-col items-center">
               <label className="font-semibold mb-2">Filter by month:</label>
               <select
@@ -138,7 +131,6 @@ const SalesOverview: React.FC = () => {
               </select>
             </div>
 
-            {/* Filter by day */}
             <div className="flex flex-col items-center">
               <label className="font-semibold mb-2">Filter by day:</label>
               <select
@@ -159,7 +151,6 @@ const SalesOverview: React.FC = () => {
 
       </div>
 
-      {/* Sales table */}
       <div className="sales-list bg-white p-4 rounded-lg shadow-md overflow-auto">
         {filteredSales.length === 0 ? (
           <p className="text-center text-gray-500">No sales data available for the selected filters.</p>
@@ -168,7 +159,7 @@ const SalesOverview: React.FC = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-300 px-4 py-2">
-                   { <input
+                   <input
                     type="checkbox"
                     checked={selectedSales.length === filteredSales.length}
                     onChange={(e) => {
@@ -178,7 +169,7 @@ const SalesOverview: React.FC = () => {
                         setSelectedSales([]);
                       }
                     }}
-                  /> } 
+                  />
                 </th>
                 <th className="border border-gray-300 px-4 py-2">Customer ID</th>
                 <th className="border border-gray-300 px-4 py-2">Customer Name</th>
@@ -194,16 +185,15 @@ const SalesOverview: React.FC = () => {
               {filteredSales.map((sale, index) => {
                 const totalPurchases = sale.purchases.reduce((sum, product) => sum + product.price, 0);
                 const discount = totalPurchases - sale.total;
-                console.log(sale.id);
                 return (
                   <tr key={index}>
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedSales.includes(index)}
-                    onChange={() => toggleSaleSelection(index)}
-                  />
-                  </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedSales.includes(index)}
+                        onChange={() => toggleSaleSelection(index)}
+                      />
+                    </td>
                     <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerName}</td>
                     <td className="border border-gray-300 px-4 py-2">{sale.customerPhone}</td>
@@ -247,10 +237,8 @@ const SalesOverview: React.FC = () => {
             Delete Selected Sales
           </button>
         )}
-
       </div>
 
-      {/* Modal for sale details */}
       {isModalOpen && selectedSaleDetails && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded-lg w-1/2">

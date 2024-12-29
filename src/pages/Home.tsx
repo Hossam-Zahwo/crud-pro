@@ -161,7 +161,7 @@ function Home() {
         />
   {/* Search and Filter Section */}
   <div className="flex justify-center items-center">
-    <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-40">
+    <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-56 md:h-40">
           <h2 className="text-lg font-semibold mb-4 text-gray-700">Price Filter</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -186,7 +186,7 @@ function Home() {
             </div>
           </div>
         </div>
-        <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-40">
+        <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-56 md:h-40">
           <h2 className="text-lg font-semibold mb-4 text-gray-700">Category Filter</h2>
           <select
             value={selectedCategory}
@@ -204,10 +204,10 @@ function Home() {
 </div>
         {/* Product List Section */}
         <section className="pt-8 pb-8 w-full">
-          <div className="products grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="products flex justify-center items-center flex-col md:grid md:grid-cols-3  gap-4">
             {filteredProducts.map((product) => (
               <div
-                className="item p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col items-center transition-all duration-300 hover:scale-105"
+                className="item md:w-full w-72 p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col items-center transition-all duration-300 hover:scale-105"
                 key={product.id}
               >
                 <div className="flex flex-col items-center">

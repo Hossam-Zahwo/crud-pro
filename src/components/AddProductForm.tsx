@@ -42,7 +42,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
     <div className="mb-6 p-6 border rounded-lg shadow-md bg-gray-50 w-full max-w-4xl mx-auto">
       <h2 className="text-xl font-semibold w-full mb-4 text-gray-700 text-center">Add Product</h2>
       <div className="flex flex-col w-full justify-center items-center">
-<div className='grid grid-cols-3 gap-4 w-full'>
+        <div className='grid grid-cols-3 gap-4 w-full'>
           {/* حقل اسم المنتج */}
           <div>
             <label className="block mb-2 text-gray-700">Product Name</label>
@@ -55,7 +55,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               className="border p-3 w-full rounded-lg"
             />
           </div>
-  
+
           {/* حقل السعر */}
           <div>
             <label className="block mb-2 text-gray-700">Price</label>
@@ -68,7 +68,22 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               className="border p-3 w-full rounded-lg"
             />
           </div>
-  
+
+          {/* حقل سعر الجملة */}
+          <div>
+            <label className="block mb-2 text-gray-700">Wholesale Price</label>
+            <input
+              type="number"
+              name="wholesalePrice"
+              value={newProduct.wholesalePrice}
+              onChange={handleInputChange}
+              placeholder="Wholesale Price"
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
+
+    
+
           {/* حقل المخزون */}
           <div>
             <label className="block mb-2 text-gray-700">Stock</label>
@@ -82,64 +97,62 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
             />
           </div>
 
-                  {/* حقل الفئة */}
-        <div>
-          <label className="block mb-2 text-gray-700">Category</label>
-          <select
-            name="category"
-            value={newProduct.category}
-            onChange={handleInputChange}
-            className="border p-3 w-full rounded-lg"
-          >
-            <option value="">Select Category</option>
-            {uniqueCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          {/* حقل الفئة */}
+          <div>
+            <label className="block mb-2 text-gray-700">Category</label>
+            <select
+              name="category"
+              value={newProduct.category}
+              onChange={handleInputChange}
+              className="border p-3 w-full rounded-lg"
+            >
+              <option value="">Select Category</option>
+              {uniqueCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* حقل الفئة الفرعية */}
+          <div>
+            <label className="block mb-2 text-gray-700">Sub-Category</label>
+            <select
+              name="subCategory"
+              value={newProduct.subCategory}
+              onChange={handleInputChange}
+              className="border p-3 w-full rounded-lg"
+            >
+              <option value="">Select Sub-Category</option>
+              {filteredSubCategories.map((subCategory) => (
+                <option key={subCategory.name} value={subCategory.name}>
+                  {subCategory.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* حقل الحجم */}
+          <div>
+            <label className="block mb-2 text-gray-700">Size</label>
+            <select
+              name="size"
+              value={newProduct.size}
+              onChange={handleInputChange}
+              className="border p-3 w-full rounded-lg"
+            >
+              <option value="">Select Size</option>
+              {sizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* حقل الفئة الفرعية */}
-        <div>
-          <label className="block mb-2 text-gray-700">Sub-Category</label>
-          <select
-            name="subCategory"
-            value={newProduct.subCategory}
-            onChange={handleInputChange}
-            className="border p-3 w-full rounded-lg"
-          >
-            <option value="">Select Sub-Category</option>
-            {filteredSubCategories.map((subCategory) => (
-              <option key={subCategory.name} value={subCategory.name}>
-                {subCategory.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* حقل الحجم */}
-        <div>
-          <label className="block mb-2 text-gray-700">Size</label>
-          <select
-            name="size"
-            value={newProduct.size}
-            onChange={handleInputChange}
-            className="border p-3 w-full rounded-lg"
-          >
-            <option value="">Select Size</option>
-            {sizes.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-</div>
-
-
-<div  className="flex justify-between items-center mt-4 gap-4 w-full">
-  
+        <div className="flex justify-between items-center mt-4 gap-4 w-full">
           {/* حقل الصورة */}
           <div>
             <label className="block mb-2 text-gray-700">Image</label>
@@ -150,19 +163,18 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               className="border p-3 w-full rounded-lg"
             />
           </div>
-            {/* زر الإضافة */}
-        <div className='flex justify-end items-end'>
-          <button
-            onClick={handleAddClick}
-            className="mt-4 flex justify-center items-center bg-blue-500 text-white h-10 p-3 w-32 hover:bg-blue-600 rounded-lg"
-          >
-            Add Product
-          </button>
-        </div>
-</div >
-      </div>
 
-    
+          {/* زر الإضافة */}
+          <div className='flex justify-end items-end'>
+            <button
+              onClick={handleAddClick}
+              className="mt-4 flex justify-center items-center bg-blue-500 text-white h-10 p-3 w-32 hover:bg-blue-600 rounded-lg"
+            >
+              Add Product
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
