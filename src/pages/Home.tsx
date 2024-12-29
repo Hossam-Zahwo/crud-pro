@@ -9,7 +9,6 @@ import CustomerForm, { Customer } from "../components/CustomerForm"; // Import C
 import AddProductForm from "../components/AddProductForm"; // Import AddProductForm for editing
 import { getInitialProducts, saveProductsToLocalStorage } from "../utils/localStorageUtils";
 import { Product } from "../data/productData";
-import SearchandFilters from "../components/SearchandFilters";
 
 function Home() {
   const [subCategories, setSubCategories] = useState([
@@ -25,30 +24,32 @@ function Home() {
   const [maxPrice, setMaxPrice] = useState<number>(Infinity);
   const [minPrice, setMinPrice] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
+
   const [products, setProducts] = useState<Product[]>(getInitialProducts());
   const [customerPurchases, setCustomerPurchases] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // State to manage the selected product for view
-  const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null); // State to manage product for editing
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
-  const [customer, setCustomer] = useState<Customer | null>(null); // State to manage customer data
-  const [showCustomerForm, setShowCustomerForm] = useState<boolean>(false); // State to control customer form display
-  const [currentDate, setCurrentDate] = useState<string>(new Date().toLocaleDateString()); // State to store current date
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [showCustomerForm, setShowCustomerForm] = useState<boolean>(false);
+  const [currentDate, setCurrentDate] = useState<string>(new Date().toLocaleDateString());
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const categories = Array.from(new Set(products.map((product) => product.category))); // Unique categories
+
+  const categories = Array.from(new Set(products.map((product) => product.category)));
+
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearchQuery(debouncedSearchQuery);
+      setDebouncedSearchQuery(searchQuery);
     }, 300);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [debouncedSearchQuery]);
+  }, [searchQuery]);
 
   useEffect(() => {
     saveProductsToLocalStorage(products);
   }, [products]);
-
 
   const handleDelete = (id: number) => {
     const updatedProducts = products.filter(product => product.id !== id);
@@ -58,7 +59,6 @@ function Home() {
     const deletedDate = new Date().toLocaleDateString();
 
     const deletedProducts = JSON.parse(localStorage.getItem('products-delete') || '[]');
-
 
     const productToDelete = products.find(product => product.id === id);
     if (productToDelete) {
@@ -70,7 +70,7 @@ function Home() {
     }
 
     localStorage.setItem('products-delete', JSON.stringify(deletedProducts));
-  
+
     const deletedCount = JSON.parse(localStorage.getItem('deletedCount') || '0');
     localStorage.setItem('deletedCount', JSON.stringify(deletedCount + 1));
   };
@@ -92,51 +92,53 @@ function Home() {
   };
 
   const handleAddToCart = (product: Product) => {
-    setProducts((prevProducts) =>    // Update Value stock at click
+    setProducts((prevProducts) =>
       prevProducts.map((p) =>
         p.id === product.id ? { ...p, stock: p.stock - 1 } : p
       )
     );
-    setCustomerPurchases((prevPurchases) => [...prevPurchases, product]); // Add product to customer purchases
+    setCustomerPurchases((prevPurchases) => [...prevPurchases, product]);
   };
 
   const handleRemoveFromCart = (productId: number) => {
     const updatedPurchases = customerPurchases.filter(product => product.id !== productId);
-    setCustomerPurchases(updatedPurchases); // Remove product from customer purchases
+    setCustomerPurchases(updatedPurchases);
   };
 
   const handleSaveCustomer = (customer: Customer) => {
-    setCustomer(customer); // Save customer data
+    setCustomer(customer);
   };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMinPrice(parseFloat(e.target.value));
   };
+
   const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMaxPrice(parseFloat(e.target.value) || Infinity);
   };
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
   };
-
 
   const filteredProducts = products.filter((product) => {
     const searchMatch =
       product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-  
+
     const categoryMatch = selectedCategory
       ? product.category.toLowerCase() === selectedCategory.toLowerCase()
       : true;
-  
+
     const priceMatch =
       product.price >= minPrice && product.price <= maxPrice;
-  
+
     return searchMatch && categoryMatch && priceMatch;
   });
-  
 
   return (
     <div className="container mx-auto pt-16 flex max-[991px]:flex-col">
@@ -154,118 +156,71 @@ function Home() {
       </div>
 
       <div className="content w-3/4 p-4 max-[991px]:w-full">
-        <Header 
-          searchQuery={debouncedSearchQuery} 
-          setSearchQuery={setDebouncedSearchQuery} // Pass search query handler to header
-          onSaveCustomer={handleSaveCustomer} // Pass handleSaveCustomer to header
+        <Header
+          searchQuery={debouncedSearchQuery}
+          setSearchQuery={setSearchQuery}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          selectedCategory={selectedCategory}
+          categories={categories}
+          handleSearchChange={handleSearchChange}
+          handleMinPriceChange={handleMinPriceChange}
+          handleMaxPriceChange={handleMaxPriceChange}
+          handleCategoryChange={handleCategoryChange}
+          onSaveCustomer={handleSaveCustomer}
         />
-  {/* Search and Filter Section */}
-  <div className="flex justify-center items-center">
-    <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-56 md:h-40">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Price Filter</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              
-              <input
-                type="number"
-                value={minPrice}
-                onChange={handleMinPriceChange}
-                className="border p-3 w-full"
-                placeholder="Min Price"
-              />
-            </div>
-            <div>
-            
-              <input
-                type="number"
-                value={maxPrice === Infinity ? "" : maxPrice}
-                onChange={handleMaxPriceChange}
-                className="border p-3 w-full"
-                placeholder="Max Price"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="p-6 border rounded-lg shadow-md bg-gray-50 flex-1 h-56 md:h-40">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Category Filter</h2>
-          <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="border p-3 w-full"
-          >
-            <option value="">Select Category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-</div>
+
         {/* Product List Section */}
         <section className="pt-8 pb-8 w-full">
-          <div className="products flex justify-center items-center flex-col md:grid md:grid-cols-3  gap-4">
+          <div className="products flex justify-center items-center flex-col md:grid md:grid-cols-3 gap-4">
             {filteredProducts.map((product) => (
               <div
                 className="item md:w-full w-72 p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col items-center transition-all duration-300 hover:scale-105"
                 key={product.id}
               >
                 <div className="flex flex-col items-center">
-                  
-                  <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4"/>
-                  
+                  <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4" />
                 </div>
-              <div className="w-full flex justify-between items-center  max-[991px]:flex-col">
-<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
-                    <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
-                    <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
-                  
-</div>
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="bg-white text-blue-500 flex justify-center items-center border border-blue-500  p-2 mt-4 w-10 h-10 font-bold hover:bg-blue-600 hover:text-white rounded-full"
-                  >
+                <div className="w-full flex justify-between items-center max-[991px]:flex-col">
+                  <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
+                  <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
+                </div>
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-white text-blue-500 flex justify-center items-center border border-blue-500 p-2 mt-4 w-10 h-10 font-bold hover:bg-blue-600 hover:text-white rounded-full"
+                >
                   <MdAddBusiness />
+                </button>
+                <div className="w-full flex justify-between items-center max-[1070px]:flex-col">
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="bg-white text-red-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-red-600 hover:text-white rounded-lg"
+                  >
+                    <RiDeleteBin6Line />
                   </button>
-              </div >
-              
-
-<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
-    <div className="flex justify-start items-center">
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="bg-white text-red-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-red-600 hover:text-white rounded-lg"
-                    >
-                      <RiDeleteBin6Line />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="bg-white text-yellow-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-yellow-600 hover:text-white rounded-lg"
-                    >
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="bg-white text-yellow-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-yellow-600 hover:text-white rounded-lg"
+                  >
                     <FaRegEdit />
-                    </button>
-                    <button
-                      onClick={() => handleView(product)}
-                      className="bg-white text-green-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-green-600 hover:text-white rounded-lg"
-                    >
-                      <GrView />
-                    </button>
-    </div>
- 
-<div>
-   {/* عرض المخزون */}
-   <p className={`text-center p-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'} flex justify-end items-center p-2 font-bold`}>
-                {product.stock > 0 ? `In Stock: ${product.stock}` : 'Out of Stock'}
-              </p>
-</div>
-</div>  
+                  </button>
+                  <button
+                    onClick={() => handleView(product)}
+                    className="bg-white text-green-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-green-600 hover:text-white rounded-lg"
+                  >
+                    <GrView />
+                  </button>
+                </div>
+                <p className={`text-center p-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'} font-bold`}>
+                  {product.stock > 0 ? `In Stock: ${product.stock}` : 'Out of Stock'}
+                </p>
               </div>
             ))}
           </div>
         </section>
       </div>
 
-      {/* Product Detail Modal */}
+      {/* Modals (Product Detail, Edit Product, Customer Form) */}
       {selectedProduct && (
         <div className="fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded-lg max-w-lg w-full">
@@ -283,7 +238,6 @@ function Home() {
         </div>
       )}
 
-      {/* Edit Product Modal */}
       {selectedProductForEdit && (
         <div className="fixed z-50 inset-0  bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded-lg max-w-lg w-full">
@@ -296,7 +250,7 @@ function Home() {
             />
             <button
               onClick={handleCancelEdit}
-              className="bg-gray-500 text-white p-2  rounded-lg hover:bg-gray-600"
+              className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600"
             >
               Cancel
             </button>

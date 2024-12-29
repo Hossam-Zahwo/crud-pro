@@ -27,6 +27,7 @@ const SalesOverview: React.FC = () => {
   const [selectedSales, setSelectedSales] = useState<number[]>([]);
   const [selectedSaleDetails, setSelectedSaleDetails] = useState<Sale | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [indexFilter, setIndexFilter] = useState<string>('');
 
   useEffect(() => {
     const fetchedSales = getSalesFromLocalStorage();
@@ -66,11 +67,37 @@ const SalesOverview: React.FC = () => {
     setSelectedSaleDetails(null);
   };
 
+  const printInvoice = (sale: Sale) => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    const invoiceContent = `
+      <html>
+        <head><title>Invoice - ${sale.customerName}</title></head>
+        <body>
+          <h1>Invoice</h1>
+          <p><strong>Customer ID:</strong> ${sale.customerId}</p>
+          <p><strong>Customer Name:</strong> ${sale.customerName}</p>
+          <p><strong>Phone:</strong> ${sale.customerPhone}</p>
+          <p><strong>Sale Date:</strong> ${sale.saleDate}</p>
+          <p><strong>Total:</strong> $${sale.total.toFixed(2)}</p>
+          <h3>Purchases:</h3>
+          <ul>
+            ${sale.purchases
+              .map((product) => `<li>${product.name}: $${product.price.toFixed(2)}</li>`)
+              .join('')}
+          </ul>
+        </body>
+      </html>
+    `;
+    printWindow?.document.write(invoiceContent);
+    printWindow?.document.close();
+    printWindow?.print();
+  };
+
   const availableYears = Array.from(
     new Set(sales.map((sale) => new Date(sale.saleDate).getFullYear()))
   );
 
-  const filteredSales = sales.filter((sale) => {
+  const filteredSales = sales.filter((sale, index) => {
     const saleDate = new Date(sale.saleDate);
     const saleMonth = saleDate.getMonth() + 1;
     const saleYear = saleDate.getFullYear();
@@ -79,8 +106,9 @@ const SalesOverview: React.FC = () => {
     const isMonthMatch = filter.month === 'All' || saleMonth === Number(filter.month);
     const isYearMatch = filter.year === 'All' || saleYear === Number(filter.year);
     const isDayMatch = filter.day === 'All' || saleDay === Number(filter.day);
+    const isIndexMatch = indexFilter ? index + 1 === Number(indexFilter) : true;  // Add this line to filter by index
 
-    return isMonthMatch && isYearMatch && isDayMatch;
+    return isMonthMatch && isYearMatch && isDayMatch && isIndexMatch;
   });
 
   const totalSales = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
@@ -88,14 +116,12 @@ const SalesOverview: React.FC = () => {
   return (
     <div className="container mx-auto p-6">
       <div className='w-full flex justify-between items-center'>
-
         <div className="mt-6 p-4 bg-blue-100 rounded-lg shadow-md text-center">
           <p className="text-xl font-bold text-blue-600">Total Sales: ${totalSales.toFixed(2)}</p>
         </div>
 
         <div className="accordion bg-gray-100 p-4 rounded-lg shadow-md mb-6">
           <div className="flex flex-wrap justify-center gap-4 mb-4">
-
             <div className="flex flex-col items-center">
               <label className="font-semibold mb-2">Filter by year:</label>
               <select
@@ -143,9 +169,19 @@ const SalesOverview: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            <div className="flex flex-col items-center">
+              <label className="font-semibold mb-2">Filter by index:</label>
+              <input
+                type="text"
+                value={indexFilter}
+                onChange={(e) => setIndexFilter(e.target.value)}
+                className="p-2 border rounded bg-white"
+                placeholder="Enter index"
+              />
+            </div>
           </div>
         </div>
-
       </div>
 
       <div className="sales-list bg-white p-4 rounded-lg shadow-md overflow-auto">
@@ -156,7 +192,7 @@ const SalesOverview: React.FC = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-300 px-4 py-2">
-                   <input
+                  <input
                     type="checkbox"
                     checked={selectedSales.length === filteredSales.length}
                     onChange={(e) => {
@@ -184,7 +220,7 @@ const SalesOverview: React.FC = () => {
                 const discount = totalPurchases - sale.total;
                 return (
                   <tr key={index}>
-                    <td className="border border-gray-300 px-4 py-2 text-center">
+                    <td className="border border-gray-300 px-4 py-2 text-center h-auto">
                       <input
                         type="checkbox"
                         checked={selectedSales.includes(index)}
@@ -198,26 +234,32 @@ const SalesOverview: React.FC = () => {
                     <td className="border border-gray-300 px-4 py-2">${sale.total.toFixed(2)}</td>
                     <td className="border border-gray-300 px-4 py-2">-${discount.toFixed(2)}</td>
                     <td className="border border-gray-300 px-4 py-2">
-                      <ul className="list-disc pl-4">
-                        {sale.purchases.map((product, idx) => (
-                          <li key={idx}>
+                      <ul>
+                        {sale.purchases.map((product, i) => (
+                          <li key={i}>
                             {product.name}: ${product.price.toFixed(2)}
                           </li>
                         ))}
                       </ul>
                     </td>
-                    <td className="border flex border-gray-300 px-4 py-2 text-center h-auto">
+                    <td className="border border-gray-300 px-4 py-2 flex justify-center h-auto gap-2">
                       <button
                         onClick={() => viewSaleDetails(sale)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                        className="text-blue-600 hover:underline"
                       >
                         View
                       </button>
                       <button
                         onClick={() => deleteSale(index)}
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 ml-2"
+                        className="text-red-600 hover:underline"
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={() => printInvoice(sale)}
+                        className="text-green-600 hover:underline"
+                      >
+                        Print Invoice
                       </button>
                     </td>
                   </tr>
@@ -226,39 +268,35 @@ const SalesOverview: React.FC = () => {
             </tbody>
           </table>
         )}
-        {selectedSales.length > 0 && (
-          <button
-            onClick={deleteSelectedSales}
-            className="bg-red-500 text-white p-2 mt-4 rounded-lg hover:bg-red-600"
-          >
-            Delete Selected Sales
-          </button>
-        )}
+      </div>
+
+      <div className="mt-4 text-center">
+        <button
+          onClick={deleteSelectedSales}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700"
+        >
+          Delete Selected Sales
+        </button>
       </div>
 
       {isModalOpen && selectedSaleDetails && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-8 rounded-lg w-1/2">
-            <h2 className="text-2xl font-bold mb-4">Sale Details</h2>
-            <p><strong>Customer ID:</strong> {selectedSaleDetails.customerId}</p>
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            <button onClick={closeModal} className="text-red-600 text-xl font-semibold absolute top-4 right-4">
+              X
+            </button>
+            <h2 className="text-xl font-bold">Sale Details</h2>
             <p><strong>Customer Name:</strong> {selectedSaleDetails.customerName}</p>
+            <p><strong>Customer ID:</strong> {selectedSaleDetails.customerId}</p>
             <p><strong>Phone:</strong> {selectedSaleDetails.customerPhone}</p>
             <p><strong>Sale Date:</strong> {selectedSaleDetails.saleDate}</p>
-            <p><strong>Total:</strong> ${selectedSaleDetails.total.toFixed(2)}</p>
-            <p><strong>Purchases:</strong></p>
-            <ul className="list-disc pl-4">
-              {selectedSaleDetails.purchases.map((product, idx) => (
-                <li key={idx}>
-                  {product.name}: ${product.price.toFixed(2)}
-                </li>
+            <h3>Purchases:</h3>
+            <ul>
+              {selectedSaleDetails.purchases.map((product, i) => (
+                <li key={i}>{product.name} - ${product.price.toFixed(2)}</li>
               ))}
             </ul>
-            <button
-              onClick={closeModal}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
-            >
-              Close
-            </button>
+            <p><strong>Total:</strong> ${selectedSaleDetails.total.toFixed(2)}</p>
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
-import React, { useEffect , useState } from "react";
-import { Product } from "../productData";
+import React, { useEffect, useState } from "react";
+import { Product } from "../data/productData";
 import { getInitialProducts, saveProductsToLocalStorage } from "../utils/localStorageUtils";
 
 interface CustomerCartProps {
