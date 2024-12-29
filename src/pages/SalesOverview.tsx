@@ -40,25 +40,22 @@ const SalesOverview: React.FC = () => {
       setSelectedSales([...selectedSales, index]);
     }
   };
-  
-  
-  
 
-  const deleteSale = (saleId: number) => {
-    const updatedSales = sales.filter((sale) => sale.id !== saleId);
+  const deleteSale = (index: number) => {
+    const updatedSales = sales.filter((_, i) => i !== index);
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     alert('Sale has been deleted successfully!');
   };
 
   const deleteSelectedSales = () => {
-    const updatedSales = sales.filter((sale) => !selectedSales.includes(sale.id));
+    const updatedSales = sales.filter((_, i) => !selectedSales.includes(i));
     setSales(updatedSales);
     localStorage.setItem('sales', JSON.stringify(updatedSales));
     setSelectedSales([]);
     alert('Selected sales have been deleted successfully!');
   };
-  
+
   const viewSaleDetails = (sale: Sale) => {
     setSelectedSaleDetails(sale);
     setIsModalOpen(true);
