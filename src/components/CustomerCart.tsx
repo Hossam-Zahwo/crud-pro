@@ -40,38 +40,15 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
   const [products, setProducts] = useState<Product[]>(getInitialProducts());
 
   useEffect(() => {
-    let storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
-
-    // جلب عداد الـ id الحالي أو البدء من 1
-    let customerIdCounter = parseInt(localStorage.getItem("customerIdCounter") || "1", 10);
+    const storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
 
     if (storedCustomers.length > 0) {
-      let latestCustomer = storedCustomers[storedCustomers.length - 1];
-
-      // إذا لم يكن لدى العميل id، قم بتعيين id جديد
-      if (!latestCustomer.id) {
-        latestCustomer.id = customerIdCounter;
-        customerIdCounter += 1; // زيادة العداد
-        localStorage.setItem("customers", JSON.stringify(storedCustomers));
-        localStorage.setItem("customerIdCounter", customerIdCounter.toString());
-      }
-
+      const latestCustomer = storedCustomers[storedCustomers.length - 1];
       setCustomer(latestCustomer);
     } else {
-      // إذا لم يكن هناك عملاء، أنشئ عميل جديد مع id=1
-      const newCustomer: Customer = {
-        id: customerIdCounter,
-        name: "New Customer",
-        phone: 123456789,
-      };
-      storedCustomers.push(newCustomer);
-      customerIdCounter += 1; // زيادة العداد
-      localStorage.setItem("customers", JSON.stringify(storedCustomers));
-      localStorage.setItem("customerIdCounter", customerIdCounter.toString());
-      setCustomer(newCustomer);
+      createNewCustomer();
     }
 
-    // إعداد السلة مع الكميات
     const updatedCart = purchases.reduce((acc: CartProduct[], product) => {
       const existingProduct = acc.find((item) => item.id === product.id);
       if (existingProduct) {
@@ -84,13 +61,32 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
     setCartProducts(updatedCart);
   }, [purchases]);
 
+  const createNewCustomer = () => {
+    const storedCustomers = JSON.parse(localStorage.getItem("customers") || "[]");
+    let customerIdCounter = parseInt(localStorage.getItem("customerIdCounter") || "1", 10);
+
+    const newCustomer: Customer = {
+      id: customerIdCounter,
+      name: `Customer ${customerIdCounter}`,
+      phone: Math.floor(100000000 + Math.random() * 900000000), // رقم عشوائي
+    };
+
+    customerIdCounter += 1;
+    storedCustomers.push(newCustomer);
+    localStorage.setItem("customers", JSON.stringify(storedCustomers));
+    localStorage.setItem("customerIdCounter", customerIdCounter.toString());
+    setCustomer(newCustomer);
+    setCartProducts([]); // سلة مشتريات فارغة
+  };
+
   const total = cartProducts.reduce(
     (sum, product) => sum + product.price * product.quantity,
     0
   );
   const tax = total * 0.1;
 
-  const discountAmount = discountType === "percentage" ? total * (discount / 100) : discount;
+  const discountAmount =
+    discountType === "percentage" ? total * (discount / 100) : discount;
 
   const effectiveDiscount = Math.max(Math.min(discountAmount, total + tax), 0);
   const totalWithTaxAndDiscount = total + tax - effectiveDiscount;
@@ -109,7 +105,7 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
       saleId: currentSaleId,
       customerId: customer.id,
       customerName: customer.name,
-      customerPhone: customer.phone,
+      customerPhone: customer.phone.toString(),
       saleDate: new Date().toISOString(),
       purchases: cartProducts,
       total: finalTotal,
@@ -132,6 +128,12 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
     localStorage.setItem("saleIdCounter", (currentSaleId + 1).toString());
 
     alert("Sale has been saved successfully!");
+
+    // تفريغ البيانات بعد الحفظ
+    setCartProducts([]);
+    createNewCustomer(); // إنشاء عميل جديد بعد الحفظ
+    setDiscount(0);
+    setDiscountType("percentage");
   };
 
   return (
@@ -144,12 +146,13 @@ const CustomerCart: React.FC<CustomerCartProps> = ({
           <p className="text-lg font-semibold">Phone: {customer.phone}</p>
         </div>
       )}
+    
       <div className="" style={{ maxHeight: "400px", width: "100%" }}>
         <ul className="w-full">
           {cartProducts.map((product) => (
             <li
               key={product.id}
-              className="flex justify-between items-center my-1 p-4 bg-gray-100 rounded-lg w-52 shadow-md"
+              className="flex justify-between items-center my-1 p-4 bg-gray-100 rounded-lg shadow-md"
             >
               <div>
                 <h3 className="text-lg font-semibold">{product.name}</h3>

@@ -9,7 +9,6 @@ import CustomerForm, { Customer } from "../components/CustomerForm"; // Import C
 import AddProductForm from "../components/AddProductForm"; // Import AddProductForm for editing
 import { getInitialProducts, saveProductsToLocalStorage } from "../utils/localStorageUtils";
 import { Product } from "../data/productData";
-import SearchandFilters from "../components/SearchandFilters";
 
 function Home() {
   const [subCategories, setSubCategories] = useState([
@@ -34,7 +33,10 @@ function Home() {
   const [showCustomerForm, setShowCustomerForm] = useState<boolean>(false); // State to control customer form display
   const [currentDate, setCurrentDate] = useState<string>(new Date().toLocaleDateString()); // State to store current date
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(1); // State to manage selected quantity
+
   const categories = Array.from(new Set(products.map((product) => product.category))); // Unique categories
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(debouncedSearchQuery);
@@ -49,7 +51,6 @@ function Home() {
     saveProductsToLocalStorage(products);
   }, [products]);
 
-
   const handleDelete = (id: number) => {
     const updatedProducts = products.filter(product => product.id !== id);
     setProducts(updatedProducts);
@@ -58,7 +59,6 @@ function Home() {
     const deletedDate = new Date().toLocaleDateString();
 
     const deletedProducts = JSON.parse(localStorage.getItem('products-delete') || '[]');
-
 
     const productToDelete = products.find(product => product.id === id);
     if (productToDelete) {
@@ -70,7 +70,7 @@ function Home() {
     }
 
     localStorage.setItem('products-delete', JSON.stringify(deletedProducts));
-  
+
     const deletedCount = JSON.parse(localStorage.getItem('deletedCount') || '0');
     localStorage.setItem('deletedCount', JSON.stringify(deletedCount + 1));
   };
@@ -92,15 +92,38 @@ function Home() {
   };
 
   const handleAddToCart = (product: Product) => {
-    setProducts((prevProducts) =>    // Update Value stock at click
+    if (!customer) {
+      alert("Please add customer details before adding to the cart.");
+      return;
+    }
+
+    if (product.stock < selectedQuantity) {
+      alert("Insufficient stock available.");
+      return;
+    }
+
+    setProducts((prevProducts) =>
       prevProducts.map((p) =>
-        p.id === product.id ? { ...p, stock: p.stock - 1 } : p
+        p.id === product.id ? { ...p, stock: p.stock - selectedQuantity } : p
       )
     );
-    setCustomerPurchases((prevPurchases) => [...prevPurchases, product]); // Add product to customer purchases
+
+    const productToAdd = { ...product, quantity: selectedQuantity };
+    setCustomerPurchases((prevPurchases) => [...prevPurchases, productToAdd]); // Add product to customer purchases
+    setSelectedQuantity(1); // Reset quantity
   };
 
   const handleRemoveFromCart = (productId: number) => {
+    const productToRemove = customerPurchases.find((product) => product.id === productId);
+
+    if (productToRemove) {
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p.id === productId ? { ...p, stock: p.stock + productToRemove.quantity } : p
+        )
+      );
+    }
+
     const updatedPurchases = customerPurchases.filter(product => product.id !== productId);
     setCustomerPurchases(updatedPurchases); // Remove product from customer purchases
   };
@@ -108,35 +131,37 @@ function Home() {
   const handleSaveCustomer = (customer: Customer) => {
     setCustomer(customer); // Save customer data
   };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMinPrice(parseFloat(e.target.value));
   };
+
   const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMaxPrice(parseFloat(e.target.value) || Infinity);
   };
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
   };
-
 
   const filteredProducts = products.filter((product) => {
     const searchMatch =
       product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-  
+
     const categoryMatch = selectedCategory
       ? product.category.toLowerCase() === selectedCategory.toLowerCase()
       : true;
-  
+
     const priceMatch =
       product.price >= minPrice && product.price <= maxPrice;
-  
+
     return searchMatch && categoryMatch && priceMatch;
   });
-  
 
   return (
     <div className="container mx-auto pt-16 flex max-[991px]:flex-col">
@@ -159,49 +184,42 @@ function Home() {
           setSearchQuery={setDebouncedSearchQuery} // Pass search query handler to header
           onSaveCustomer={handleSaveCustomer} // Pass handleSaveCustomer to header
         />
-  {/* Search and Filter Section */}
-  <div className="flex justify-center items-center">
-    
 
-          <div className="py-6 px-3 flex justify-center items-center border rounded-lg shadow-md bg-gray-50  flex-1 h-20 ">
-            <div>
-              
-              <input
-                type="number"
-                value={minPrice}
-                onChange={handleMinPriceChange}
-                className="border p-3 w-full"
-                placeholder="Min Price"
-              />
-            </div>
-            <div>
-            
-              <input
-                type="number"
-                value={maxPrice === Infinity ? "" : maxPrice}
-                onChange={handleMaxPriceChange}
-                className="border p-3 w-full"
-                placeholder="Max Price"
-              />
-            </div>
+        {/* Search and Filter Section */}
+        <div className="flex justify-center items-center">
+          <div className="py-6 px-3 flex justify-center items-center border rounded-lg shadow-md bg-gray-50  flex-1 h-20">
+            <input
+              type="number"
+              value={minPrice}
+              onChange={handleMinPriceChange}
+              className="border p-3 w-full"
+              placeholder="Min Price"
+            />
+            <input
+              type="number"
+              value={maxPrice === Infinity ? "" : maxPrice}
+              onChange={handleMaxPriceChange}
+              className="border p-3 w-full"
+              placeholder="Max Price"
+            />
           </div>
-        
-        <div className="py-6 px-3 flex justify-center items-center border rounded-lg shadow-md bg-gray-50  flex-1 h-20">
-    
-          <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="border p-3 w-full"
-          >
-            <option value="">Select Category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+
+          <div className="py-6 px-3 flex justify-center items-center border rounded-lg shadow-md bg-gray-50  flex-1 h-20">
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="border p-3 w-full"
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-</div>
+
         {/* Product List Section */}
         <section className="pt-8 pb-8 w-full">
           <div className="products grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -210,99 +228,34 @@ function Home() {
                 className="item p-4 border rounded-lg shadow-md bg-gray-50 flex flex-col items-center transition-all duration-300 hover:scale-105"
                 key={product.id}
               >
-                <div className="flex flex-col items-center">
-                  
-                  <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4"/>
-                  
-                </div>
-              <div className="w-full flex justify-between items-center  max-[991px]:flex-col">
-<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
-                    <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
-                    <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
-                  
-</div>
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="bg-white text-blue-500 flex justify-center items-center border border-blue-500  p-2 mt-4 w-10 h-10 font-bold hover:bg-blue-600 hover:text-white rounded-full"
-                  >
-                  <MdAddBusiness />
-                  </button>
-              </div >
-              
+                <img src={product.image} alt={product.name} className="w-60 h-32 object-cover rounded-lg mb-4" />
+                <h4 className="text-[20px] font-semibold uppercase text-blue-400 p-2 mt-4">{product.name}</h4>
+                <p className="text-gray-700 text-lg text-center p-2 mt-4 font-bold">{product.price}$</p>
+                <p className={`text-center p-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'} font-bold`}>
+                  {product.stock > 0 ? `In Stock: ${product.stock}` : 'Out of Stock'}
+                </p>
 
-<div className="w-full flex justify-between items-center max-[1070px]:flex-col">
-    <div className="flex justify-start items-center">
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="bg-white text-red-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-red-600 hover:text-white rounded-lg"
-                    >
-                      <RiDeleteBin6Line />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="bg-white text-yellow-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-yellow-600 hover:text-white rounded-lg"
-                    >
-                    <FaRegEdit />
-                    </button>
-                    <button
-                      onClick={() => handleView(product)}
-                      className="bg-white text-green-500 p-2 mt-2 w-10 flex justify-center items-center border hover:bg-green-600 hover:text-white rounded-lg"
-                    >
-                      <GrView />
-                    </button>
-    </div>
- 
-<div>
-   {/* عرض المخزون */}
-   <p className={`text-center p-2 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'} flex justify-end items-center p-2 font-bold`}>
-                {product.stock > 0 ? `In Stock: ${product.stock}` : 'Out of Stock'}
-              </p>
-</div>
-</div>  
+                <input
+                  type="number"
+                  value={selectedQuantity}
+                  min={1}
+                  max={product.stock}
+                  onChange={(e) => setSelectedQuantity(Number(e.target.value))}
+                  className="border p-2 w-16 text-center mb-4"
+                />
+
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-blue-500 text-white p-2 w-full rounded-lg hover:bg-blue-600"
+                  disabled={product.stock <= 0}
+                >
+                  Add to Cart
+                </button>
               </div>
             ))}
           </div>
         </section>
       </div>
-
-      {/* Product Detail Modal */}
-      {selectedProduct && (
-        <div className="fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg max-w-lg w-full">
-            <h2 className="text-2xl font-bold text-center text-blue-600">{selectedProduct.name}</h2>
-            <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-64 object-cover my-4" />
-            <p>{selectedProduct.description}</p>
-            <p className="font-semibold text-lg mt-4">{selectedProduct.price}$</p>
-            <button
-              onClick={handleCancelView}
-              className="bg-gray-500 text-white p-2 mt-4 rounded-lg hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Product Modal */}
-      {selectedProductForEdit && (
-        <div className="fixed z-50 inset-0  bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg max-w-lg w-full">
-            <h2 className="text-2xl font-bold text-center text-blue-600">Edit Product</h2>
-            <AddProductForm
-              newProduct={selectedProductForEdit}
-              handleInputChange={() => {}}
-              handleAddClick={() => {}}
-              handleImageUpload={() => {}}
-            />
-            <button
-              onClick={handleCancelEdit}
-              className="bg-gray-500 text-white p-2  rounded-lg hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Customer Form Modal */}
       {showCustomerForm && (
