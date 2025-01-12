@@ -55,30 +55,8 @@ function Navbar() {
             <BsBuildingDash  className="text-lg" /> 
           </NavLink>
         </li>
-        <li className="mb-4">
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              isActive
-                ? "py-2 px-2 bg-gray-400 flex justify-center items-center"
-                : "py-2 px-2 hover:bg-gray-500 flex justify-center items-center shadow-md"
-            }
-          >
-            <FaInfoCircle className="text-lg" /> 
-          </NavLink>
-        </li>
-        <li className="mb-4">
-          <NavLink
-            to="/contact"
-            className={({ isActive }) =>
-              isActive
-                ? "py-2 px-2 bg-gray-400 flex justify-center items-center"
-                : "py-2 px-2 hover:bg-gray-500 flex justify-center items-center shadow-md"
-            }
-          >
-            <FaPhone className="text-lg" /> 
-          </NavLink>
-        </li>
+    
+      
 
       </ul>
     </nav>

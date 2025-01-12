@@ -242,7 +242,7 @@ const SalesOverview: React.FC = () => {
                         ))}
                       </ul>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 flex justify-center h-auto gap-2">
+                    <td className="border  border-gray-300 px-4 py-2 flex justify-center items-center h-auto gap-2">
                       <button
                         onClick={() => viewSaleDetails(sale)}
                         className="text-blue-600 hover:underline"
@@ -259,7 +259,7 @@ const SalesOverview: React.FC = () => {
                         onClick={() => printInvoice(sale)}
                         className="text-green-600 hover:underline"
                       >
-                        Print Invoice
+                        Print
                       </button>
                     </td>
                   </tr>

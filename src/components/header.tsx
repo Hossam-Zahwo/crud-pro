@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, setSearchQuery, onSaveCust
 
   return (
     <nav className="flex justify-center items-center">
-      <nav className="fixed top-0 left-0  p-4 z-50 shadow-md w-full bg-white mx-5 rounded-[30px]">
+      <nav className="fixed top-0 left-0  p-4 z-50 shadow-md w-full bg-white   rounded-[30px]">
         <div className="flex justify-between items-center pr-[20px] pl-[20px]">
           <div className="text-xl font-semibold">Order</div>
 
